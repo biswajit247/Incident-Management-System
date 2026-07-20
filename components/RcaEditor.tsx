@@ -103,6 +103,7 @@ export default function RcaEditor({ incident, existingRca }: RcaEditorProps) {
     const report: RcaReport = {
       id: existingRca?.id || `RCA-${incident.id.replace('INC-', '')}`,
       incidentId: incident.id,
+      organizationId: incident.organizationId || 'org-protiviti-in',
       title: `Root Cause Analysis: ${incident.title}`,
       severity: incident.severity,
       author: incident.assignedTo.name,

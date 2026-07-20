@@ -1,5 +1,50 @@
-import { Incident, OnCallShift, RcaReport, Responder, TimelineEvent, WarRoomMessage } from './types';
+import { Incident, OnCallShift, Organization, RcaReport, Responder, TimelineEvent, WarRoomMessage } from './types';
 import { calculateSLADeadlines } from './slaUtils';
+
+export const MOCK_ORGANIZATIONS: Organization[] = [
+  {
+    id: 'org-protiviti-in',
+    name: 'Protiviti India',
+    subdomain: 'india.protiviti.com',
+    prefix: 'PRO',
+    badgeColor: '#0891b2', // Cyan
+    slaSettings: {
+      P1: { ttaMins: 5, ttrMins: 30 },
+      P2: { ttaMins: 15, ttrMins: 120 },
+      P3: { ttaMins: 60, ttrMins: 480 },
+      P4: { ttaMins: 240, ttrMins: 1440 },
+    },
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'org-acme-fin',
+    name: 'Acme Financial Systems',
+    subdomain: 'fin.acme.io',
+    prefix: 'ACME',
+    badgeColor: '#10b981', // Emerald
+    slaSettings: {
+      P1: { ttaMins: 3, ttrMins: 15 },
+      P2: { ttaMins: 10, ttrMins: 60 },
+      P3: { ttaMins: 30, ttrMins: 240 },
+      P4: { ttaMins: 120, ttrMins: 720 },
+    },
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'org-nexus-cloud',
+    name: 'Nexus Cloud Infrastructure',
+    subdomain: 'cloud.nexus.net',
+    prefix: 'NEX',
+    badgeColor: '#8b5cf6', // Violet
+    slaSettings: {
+      P1: { ttaMins: 10, ttrMins: 60 },
+      P2: { ttaMins: 30, ttrMins: 240 },
+      P3: { ttaMins: 120, ttrMins: 960 },
+      P4: { ttaMins: 480, ttrMins: 2880 },
+    },
+    createdAt: new Date().toISOString(),
+  },
+];
 
 export const MOCK_RESPONDERS: Responder[] = [
   {
@@ -60,7 +105,8 @@ const p4Sla = calculateSLADeadlines(minutesAgo(180), 'P4');
 
 export const INITIAL_INCIDENTS: Incident[] = [
   {
-    id: 'INC-9042',
+    id: 'PRO-9042',
+    organizationId: 'org-protiviti-in',
     title: 'Payment Gateway API 504 Timeouts on Checkout API Gateway',
     description: 'Datadog Alert: Payment Service HTTP 5xx error rate exceeded 18.5% threshold. Spike in Stripe connection pool exhaustion during peak transaction load.',
     severity: 'P1',
@@ -74,8 +120,8 @@ export const INITIAL_INCIDENTS: Incident[] = [
     ttaBreached: false,
     ttrBreached: false,
     source: 'datadog',
-    warRoomUrl: 'https://warroom.company.internal/INC-9042',
-    videoBridgeUrl: 'https://meet.jit.si/Incident-Command-INC-9042',
+    warRoomUrl: 'https://warroom.company.internal/PRO-9042',
+    videoBridgeUrl: 'https://meet.jit.si/Incident-Command-PRO-9042',
     tags: ['stripe', 'checkout', 'p1-outage', 'connection-pool'],
     affectedMetrics: {
       errorRate: '18.5%',
@@ -84,7 +130,8 @@ export const INITIAL_INCIDENTS: Incident[] = [
     },
   },
   {
-    id: 'INC-9041',
+    id: 'PRO-9041',
+    organizationId: 'org-protiviti-in',
     title: 'Production Database Primary Node High Disk I/O & Connection Saturation',
     description: 'Prometheus Alert: postgres_pg_stat_database_numbackends > 980 (Limit: 1000). Unindexed query from analytics pipeline blocking write locks on customer_sessions table.',
     severity: 'P1',
@@ -97,8 +144,8 @@ export const INITIAL_INCIDENTS: Incident[] = [
     ttaBreached: true,
     ttrBreached: false,
     source: 'prometheus',
-    warRoomUrl: 'https://warroom.company.internal/INC-9041',
-    videoBridgeUrl: 'https://meet.jit.si/Incident-Command-INC-9041',
+    warRoomUrl: 'https://warroom.company.internal/PRO-9041',
+    videoBridgeUrl: 'https://meet.jit.si/Incident-Command-PRO-9041',
     tags: ['postgres', 'database', 'locking', 'disk-io'],
     affectedMetrics: {
       cpu: '98%',
@@ -107,7 +154,8 @@ export const INITIAL_INCIDENTS: Incident[] = [
     },
   },
   {
-    id: 'INC-9043',
+    id: 'PRO-9043',
+    organizationId: 'org-protiviti-in',
     title: 'Kolkata 10th Floor Server Room AC Failure & Thermal Spike',
     description: 'Security & Facilities Incident: Server room 10th Floor AC tripped causing rapid temperature rise. Technician paged on 30th Dec; AC repaired and under observation.',
     severity: 'P2',
@@ -126,7 +174,8 @@ export const INITIAL_INCIDENTS: Incident[] = [
     tags: ['kolkata', 'server-room', 'ac-failure', 'facilities', 'thermal'],
   },
   {
-    id: 'INC-9039',
+    id: 'ACME-9039',
+    organizationId: 'org-acme-fin',
     title: 'Redis Cluster Memory Eviction Spike in OAuth Token Store',
     description: 'Memory usage reached 92% maxmemory capacity. Volatile-lru evicting active user refresh tokens causing re-authentication prompts for active web sessions.',
     severity: 'P2',
@@ -140,8 +189,8 @@ export const INITIAL_INCIDENTS: Incident[] = [
     ttaBreached: false,
     ttrBreached: false,
     source: 'cloudwatch',
-    warRoomUrl: 'https://warroom.company.internal/INC-9039',
-    videoBridgeUrl: 'https://meet.jit.si/Incident-Command-INC-9039',
+    warRoomUrl: 'https://warroom.company.internal/ACME-9039',
+    videoBridgeUrl: 'https://meet.jit.si/Incident-Command-ACME-9039',
     tags: ['redis', 'auth', 'tokens', 'memory-eviction'],
     affectedMetrics: {
       latencyP99: '340 ms',
@@ -149,7 +198,8 @@ export const INITIAL_INCIDENTS: Incident[] = [
     },
   },
   {
-    id: 'INC-9035',
+    id: 'NEX-9035',
+    organizationId: 'org-nexus-cloud',
     title: 'Kafka Consumer Group Backlog (> 180k messages) in Audit Event Pipeline',
     description: 'Audit logger worker nodes crashing out-of-memory due to unhandled JSON schema payload modification in deployment v2.4.1.',
     severity: 'P3',
@@ -166,7 +216,8 @@ export const INITIAL_INCIDENTS: Incident[] = [
     tags: ['kafka', 'audit-log', 'consumer-lag'],
   },
   {
-    id: 'INC-9028',
+    id: 'PRO-9028',
+    organizationId: 'org-protiviti-in',
     title: 'Global CDN CSS Cache Misconfiguration & Asset 404s on Staging',
     description: 'Cloudflare edge node cache header override causing cache misses on static bundle assets.',
     severity: 'P4',
@@ -286,6 +337,7 @@ export const INITIAL_WAR_ROOM_MESSAGES: Record<string, WarRoomMessage[]> = {
 export const INITIAL_ON_CALL_SHIFTS: OnCallShift[] = [
   {
     id: 'shift-1',
+    organizationId: 'org-protiviti-in',
     teamName: 'Payments & Checkout',
     service: 'Payments Engine',
     tier1: MOCK_RESPONDERS[2], // David Chen
@@ -297,6 +349,7 @@ export const INITIAL_ON_CALL_SHIFTS: OnCallShift[] = [
   },
   {
     id: 'shift-2',
+    organizationId: 'org-protiviti-in',
     teamName: 'Database & Infrastructure',
     service: 'Platform & DB',
     tier1: MOCK_RESPONDERS[1], // Elena Rostova
@@ -308,6 +361,7 @@ export const INITIAL_ON_CALL_SHIFTS: OnCallShift[] = [
   },
   {
     id: 'shift-3',
+    organizationId: 'org-acme-fin',
     teamName: 'Identity & Access',
     service: 'Security & Auth',
     tier1: MOCK_RESPONDERS[3], // Sarah Jenkins
@@ -322,7 +376,8 @@ export const INITIAL_ON_CALL_SHIFTS: OnCallShift[] = [
 export const INITIAL_RCA_REPORTS: RcaReport[] = [
   {
     id: 'RCA-9043',
-    incidentId: 'INC-9043',
+    incidentId: 'PRO-9043',
+    organizationId: 'org-protiviti-in',
     title: 'Incident Occurrence Report: Kolkata 10th Floor Server Room AC Failure',
     severity: 'P2',
     author: 'Arijit Naskar',
@@ -365,7 +420,8 @@ export const INITIAL_RCA_REPORTS: RcaReport[] = [
   },
   {
     id: 'RCA-9028',
-    incidentId: 'INC-9028',
+    incidentId: 'PRO-9028',
+    organizationId: 'org-protiviti-in',
     title: 'Post-Mortem: CDN Asset 404 Cache Misconfiguration',
     severity: 'P4',
     author: 'Marcus Vance',

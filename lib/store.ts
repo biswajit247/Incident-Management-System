@@ -1,14 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Incident, IncidentStatus, OnCallShift, RcaReport, Responder, Severity, TimelineEvent, WarRoomMessage } from './types';
+import { Incident, IncidentStatus, OnCallShift, Organization, RcaReport, Responder, Severity, SLAConfig, TimelineEvent, WarRoomMessage } from './types';
 import { 
   INITIAL_INCIDENTS, 
   INITIAL_TIMELINE_EVENTS, 
   INITIAL_WAR_ROOM_MESSAGES, 
   INITIAL_ON_CALL_SHIFTS, 
   INITIAL_RCA_REPORTS, 
-  MOCK_RESPONDERS 
+  MOCK_RESPONDERS,
+  MOCK_ORGANIZATIONS 
 } from './mockData';
 import { calculateSLADeadlines, getTimeRemaining } from './slaUtils';
 
@@ -23,14 +24,17 @@ export interface NotificationLog {
   status: 'DELIVERED' | 'SENT' | 'FAILED';
 }
 
-const STORAGE_KEY = 'incident_system_state_v1';
+const STORAGE_KEY = 'incident_system_state_v2';
 
 export function useIncidentStore() {
-  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [organizations, setOrganizations] = useState<Organization[]>(MOCK_ORGANIZATIONS);
+  const [activeOrgId, setActiveOrgId] = useState<string>('org-protiviti-in');
+
+  const [rawIncidents, setIncidents] = useState<Incident[]>([]);
   const [timelineEvents, setTimelineEvents] = useState<Record<string, TimelineEvent[]>>({});
   const [warRoomMessages, setWarRoomMessages] = useState<Record<string, WarRoomMessage[]>>({});
-  const [shifts, setShifts] = useState<OnCallShift[]>([]);
-  const [rcaReports, setRcaReports] = useState<RcaReport[]>([]);
+  const [rawShifts, setShifts] = useState<OnCallShift[]>([]);
+  const [rawRcaReports, setRcaReports] = useState<RcaReport[]>([]);
   const [notifications, setNotifications] = useState<NotificationLog[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -69,17 +73,17 @@ export function useIncidentStore() {
     if (!isLoaded) return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        incidents,
+        incidents: rawIncidents,
         timelineEvents,
         warRoomMessages,
-        shifts,
-        rcaReports,
+        shifts: rawShifts,
+        rcaReports: rawRcaReports,
         notifications
       }));
     } catch (e) {
       console.error('Failed to save storage state:', e);
     }
-  }, [incidents, timelineEvents, warRoomMessages, shifts, rcaReports, notifications, isLoaded]);
+  }, [rawIncidents, timelineEvents, warRoomMessages, rawShifts, rawRcaReports, notifications, isLoaded]);
 
   // Periodic SLA Breach Checker
   useEffect(() => {
@@ -125,6 +129,16 @@ export function useIncidentStore() {
     setNotifications(prev => [newNotif, ...prev]);
   };
 
+  const activeOrganization = organizations.find(o => o.id === activeOrgId) || organizations[0];
+
+  const updateOrganizationSla = (orgId: string, newSlaSettings: SLAConfig) => {
+    setOrganizations(prev => prev.map(o => o.id === orgId ? { ...o, slaSettings: newSlaSettings } : o));
+  };
+
+  const incidents = activeOrgId === 'ALL' ? rawIncidents : rawIncidents.filter(i => i.organizationId === activeOrgId);
+  const shifts = activeOrgId === 'ALL' ? rawShifts : rawShifts.filter(s => s.organizationId === activeOrgId);
+  const rcaReports = activeOrgId === 'ALL' ? rawRcaReports : rawRcaReports.filter(r => r.organizationId === activeOrgId);
+
   // Add Incident
   const createIncident = (data: {
     title: string;
@@ -135,15 +149,19 @@ export function useIncidentStore() {
     tags?: string[];
   }) => {
     const createdAt = new Date().toISOString();
-    const id = `INC-${Math.floor(1000 + Math.random() * 9000)}`;
+    const prefix = activeOrganization.prefix || 'PRO';
+    const id = `${prefix}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const orgId = activeOrgId === 'ALL' ? organizations[0].id : activeOrgId;
+
     const { ttaDeadline, ttrDeadline } = calculateSLADeadlines(createdAt, data.severity);
 
     // Pick responder based on service shift
-    const matchingShift = shifts.find(s => s.service === data.service) || shifts[0];
+    const matchingShift = rawShifts.find(s => s.service === data.service && s.organizationId === orgId) || rawShifts[0];
     const assignedTo = matchingShift.tier1;
 
     const newIncident: Incident = {
       id,
+      organizationId: orgId,
       title: data.title,
       description: data.description,
       severity: data.severity,
@@ -183,7 +201,6 @@ export function useIncidentStore() {
     setTimelineEvents(prev => ({ ...prev, [id]: [initialEvent] }));
     setWarRoomMessages(prev => ({ ...prev, [id]: [initialMessage] }));
 
-    // Dispatch SMS / Voice mock notification
     dispatchNotification(id, assignedTo, 'SMS', `[URGENT ${data.severity}] ${id}: ${data.title}. Acknowledge at: https://ops.company.internal/incidents/${id}`);
     if (data.severity === 'P1') {
       dispatchNotification(id, assignedTo, 'VOICE_CALL', `P1 Critical Alert triggered for ${data.service}. Immediate acknowledgement required.`);
@@ -352,6 +369,8 @@ export function useIncidentStore() {
   // Reset to default mock data
   const resetToDefault = () => {
     localStorage.removeItem(STORAGE_KEY);
+    setOrganizations(MOCK_ORGANIZATIONS);
+    setActiveOrgId('org-protiviti-in');
     setIncidents(INITIAL_INCIDENTS);
     setTimelineEvents(INITIAL_TIMELINE_EVENTS);
     setWarRoomMessages(INITIAL_WAR_ROOM_MESSAGES);
@@ -362,11 +381,19 @@ export function useIncidentStore() {
 
   return {
     isLoaded,
+    organizations,
+    activeOrgId,
+    activeOrganization,
+    setActiveOrgId,
+    updateOrganizationSla,
     incidents,
+    allIncidents: rawIncidents,
     timelineEvents,
     warRoomMessages,
     shifts,
+    allShifts: rawShifts,
     rcaReports,
+    allRcaReports: rawRcaReports,
     notifications,
     createIncident,
     acknowledgeIncident,

@@ -20,8 +20,20 @@ export interface Responder {
   team: string;
 }
 
+export interface Organization {
+  id: string;
+  name: string;
+  subdomain: string;
+  prefix: string;
+  logoUrl?: string;
+  badgeColor: string;
+  slaSettings: SLAConfig;
+  createdAt: string;
+}
+
 export interface Incident {
   id: string;
+  organizationId: string;
   title: string;
   description: string;
   severity: Severity;
@@ -72,6 +84,7 @@ export interface WarRoomMessage {
 
 export interface OnCallShift {
   id: string;
+  organizationId: string;
   teamName: string;
   service: string;
   tier1: Responder;
@@ -94,6 +107,7 @@ export interface ActionItem {
 export interface RcaReport {
   id: string;
   incidentId: string;
+  organizationId: string;
   title: string;
   severity: Severity;
   author: string;
@@ -123,6 +137,7 @@ export interface SLAConfig {
 
 export interface IncidentOccurrenceRecord {
   id: string;
+  organizationId: string;
   incidentNumber: string;
   reportedDate: string;
   severityLevel: 'Level 1 (Low)' | 'Level 2 (Medium)' | 'Level 3 (High)';
