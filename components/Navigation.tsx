@@ -129,10 +129,10 @@ export default function Navigation() {
 
             <button
               onClick={() => setIsSimModalOpen(true)}
-              className="flex items-center space-x-1.5 rounded-lg bg-gradient-to-r from-amber-600 to-orange-600 px-3 py-1.5 text-xs font-semibold text-white hover:from-amber-500 hover:to-orange-500 transition-all shadow-md shadow-amber-500/10"
+              className="flex items-center space-x-1.5 rounded-lg bg-gradient-to-r from-red-600 to-amber-600 px-3 py-1.5 text-xs font-semibold text-white hover:from-red-500 hover:to-amber-500 transition-all shadow-md shadow-red-500/10"
             >
               <Radio className="h-4 w-4" />
-              <span>Simulate Alert</span>
+              <span>+ Emergency Alert</span>
             </button>
 
             {/* Authenticated User Profile Badge */}
@@ -156,14 +156,6 @@ export default function Navigation() {
                 Login
               </button>
             )}
-
-            <button
-              onClick={resetToDefault}
-              title="Reset state to default demo data"
-              className="p-1.5 rounded-lg border border-gray-800 bg-gray-900 text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
-            >
-              <RefreshCw className="h-4 w-4" />
-            </button>
           </div>
 
         </div>

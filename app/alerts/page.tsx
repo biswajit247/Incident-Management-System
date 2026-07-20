@@ -59,22 +59,22 @@ export default function AlertsPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-2xl border border-gray-800 bg-gray-900/60 p-6 backdrop-blur-md">
         <div>
           <div className="flex items-center space-x-2">
-            <span className="rounded bg-amber-500/20 text-amber-300 px-2.5 py-0.5 text-xs font-bold border border-amber-500/30">
-              API WEBHOOK ENDPOINT
+            <span className="rounded bg-cyan-500/20 text-cyan-300 px-2.5 py-0.5 text-xs font-bold border border-cyan-500/30">
+              PRODUCTION WEBHOOK ENDPOINT
             </span>
-            <h1 className="text-2xl font-black text-white">Monitoring Alert Ingestion Hub</h1>
+            <h1 className="text-2xl font-black text-white">Production Alert Ingestion Hub</h1>
           </div>
           <p className="mt-1 text-xs text-gray-400">
-            Ingest telemetry webhooks from Datadog, Prometheus, AWS CloudWatch, Grafana & custom APIs
+            Real-time telemetry ingestion from Datadog, Prometheus, AWS CloudWatch, Grafana & custom REST APIs
           </p>
         </div>
 
         <button
           onClick={() => setIsSimModalOpen(true)}
-          className="flex items-center space-x-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 px-5 py-2.5 text-xs font-bold text-gray-950 hover:from-amber-400 hover:to-orange-500 shadow-lg shadow-amber-500/20"
+          className="flex items-center space-x-2 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 px-5 py-2.5 text-xs font-bold text-white hover:from-cyan-500 hover:to-blue-500 shadow-lg shadow-cyan-500/20"
         >
-          <Play className="h-4 w-4 fill-gray-950" />
-          <span>Launch Alert Simulator</span>
+          <Play className="h-4 w-4 fill-white" />
+          <span>+ Trigger Emergency Alert</span>
         </button>
       </div>
 

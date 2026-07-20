@@ -70,33 +70,29 @@ export default function IncidentStepperForm() {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   // Step 1 State
-  const [incidentNumber] = useState(`PRO - 0${Math.floor(2 + Math.random() * 8)} / KOL`);
+  const [incidentNumber] = useState(`PRO - 0${Math.floor(10 + Math.random() * 90)} / KOL`);
   const [reportedDate, setReportedDate] = useState(new Date().toISOString().slice(0, 16));
   const [site, setSite] = useState('kolkata');
-  const [securityLead, setSecurityLead] = useState('Arijit Naskar');
-  const [contactMobile, setContactMobile] = useState('87775 48171, 89811 44755');
-  const [exactLocation, setExactLocation] = useState('Kolkata (10th Floor) Server Room');
-  const [severityLevel, setSeverityLevel] = useState<'Level 1 (Low)' | 'Level 2 (Medium)' | 'Level 3 (High)'>('Level 2 (Medium)');
-  const [description, setDescription] = useState(
-    'The AC of the server room (10th Floor) got tripped cause of which the temperature of the room increased. The technician was called & the issue resolved.'
-  );
+  const [securityLead, setSecurityLead] = useState('');
+  const [contactMobile, setContactMobile] = useState('');
+  const [exactLocation, setExactLocation] = useState('');
+  const [severityLevel, setSeverityLevel] = useState<'Level 1 (Low)' | 'Level 2 (Medium)' | 'Level 3 (High)'>('Level 1 (Low)');
+  const [description, setDescription] = useState('');
 
   // Step 2 State
   const [bodyPartsInjured, setBodyPartsInjured] = useState<string[]>(['None / No Injury']);
-  const [actionsTaken, setActionsTaken] = useState<string[]>(['Others (Technician / Maintenance)']);
+  const [actionsTaken, setActionsTaken] = useState<string[]>([]);
   const [natureOfInjury, setNatureOfInjury] = useState<string[]>([]);
 
   // Step 3 State
-  const [hazardTypes, setHazardTypes] = useState<string[]>(['Thermal comfort / AC ventilation']);
-  const [incidentTypes, setIncidentTypes] = useState<string[]>(['Technical Incident']);
-  const [systemFailures, setSystemFailures] = useState<string[]>(['Maintenance', 'Equip/Mech Failure']);
-  const [correctiveActions, setCorrectiveActions] = useState(
-    'HVAC technician repaired compressor breaker relay. System kept under continuous thermal monitoring.'
-  );
+  const [hazardTypes, setHazardTypes] = useState<string[]>([]);
+  const [incidentTypes, setIncidentTypes] = useState<string[]>([]);
+  const [systemFailures, setSystemFailures] = useState<string[]>([]);
+  const [correctiveActions, setCorrectiveActions] = useState('');
 
   // Step 4 State
-  const [shiftIcSignature, setShiftIcSignature] = useState('Shuvam Boral, Puja Dutta');
-  const [fmLeadSignature, setFmLeadSignature] = useState('Arijit Naskar');
+  const [shiftIcSignature, setShiftIcSignature] = useState('');
+  const [fmLeadSignature, setFmLeadSignature] = useState('');
 
   const toggleArrayItem = (list: string[], setList: (val: string[]) => void, item: string) => {
     if (list.includes(item)) {
