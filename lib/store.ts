@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Incident, IncidentStatus, OnCallShift, Organization, RcaReport, Responder, Severity, SLAConfig, TimelineEvent, WarRoomMessage } from './types';
+import { Incident, IncidentStatus, OnCallShift, Organization, RcaReport, Responder, Severity, SLAConfig, TimelineEvent, User, WarRoomMessage } from './types';
 import { 
   INITIAL_INCIDENTS, 
   INITIAL_TIMELINE_EVENTS, 
@@ -9,7 +9,8 @@ import {
   INITIAL_ON_CALL_SHIFTS, 
   INITIAL_RCA_REPORTS, 
   MOCK_RESPONDERS,
-  MOCK_ORGANIZATIONS 
+  MOCK_ORGANIZATIONS,
+  MOCK_USERS 
 } from './mockData';
 import { calculateSLADeadlines, getTimeRemaining } from './slaUtils';
 
@@ -29,6 +30,9 @@ const STORAGE_KEY = 'incident_system_state_v2';
 export function useIncidentStore() {
   const [organizations, setOrganizations] = useState<Organization[]>(MOCK_ORGANIZATIONS);
   const [activeOrgId, setActiveOrgId] = useState<string>('org-protiviti-in');
+
+  const [currentUser, setCurrentUser] = useState<User | null>(MOCK_USERS[0]); // Default: Shuvam Boral (Protiviti)
+  const [jwtToken, setJwtToken] = useState<string | null>(null);
 
   const [rawIncidents, setIncidents] = useState<Incident[]>([]);
   const [timelineEvents, setTimelineEvents] = useState<Record<string, TimelineEvent[]>>({});
@@ -378,9 +382,38 @@ export function useIncidentStore() {
     setRcaReports(INITIAL_RCA_REPORTS);
     setNotifications([]);
   };
+  // Login Handler
+  const login = (email: string, pass: string) => {
+    const user = MOCK_USERS.find(u => u.email.toLowerCase() === email.toLowerCase());
+    if (user) {
+      setCurrentUser(user);
+      setActiveOrgId(user.organizationId);
+      const payload = {
+        sub: user.id,
+        email: user.email,
+        orgId: user.organizationId,
+        role: user.role,
+        exp: Math.floor(Date.now() / 1000) + 86400,
+      };
+      const token = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${btoa(JSON.stringify(payload))}.sig`;
+      setJwtToken(token);
+      return token;
+    }
+    return null;
+  };
+
+  // Logout Handler
+  const logout = () => {
+    setCurrentUser(null);
+    setJwtToken(null);
+  };
 
   return {
     isLoaded,
+    currentUser,
+    jwtToken,
+    login,
+    logout,
     organizations,
     activeOrgId,
     activeOrganization,

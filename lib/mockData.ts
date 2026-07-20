@@ -1,4 +1,4 @@
-import { Incident, OnCallShift, Organization, RcaReport, Responder, TimelineEvent, WarRoomMessage } from './types';
+import { Incident, OnCallShift, Organization, RcaReport, Responder, TimelineEvent, User, WarRoomMessage } from './types';
 import { calculateSLADeadlines } from './slaUtils';
 
 export const MOCK_ORGANIZATIONS: Organization[] = [
@@ -43,6 +43,54 @@ export const MOCK_ORGANIZATIONS: Organization[] = [
       P4: { ttaMins: 480, ttrMins: 2880 },
     },
     createdAt: new Date().toISOString(),
+  },
+];
+
+export const MOCK_USERS: User[] = [
+  {
+    id: 'usr-101',
+    name: 'Shuvam Boral',
+    email: 'shuvam@protiviti.com',
+    organizationId: 'org-protiviti-in',
+    role: 'SecurityLead',
+    title: 'Security Shift IC Lead',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150',
+  },
+  {
+    id: 'usr-102',
+    name: 'Rahul Lal',
+    email: 'rahul.admin@protiviti.com',
+    organizationId: 'org-protiviti-in',
+    role: 'OrgAdmin',
+    title: 'VP of Infrastructure & Security',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150',
+  },
+  {
+    id: 'usr-103',
+    name: 'Puja Dutta',
+    email: 'puja@protiviti.com',
+    organizationId: 'org-protiviti-in',
+    role: 'Reporter',
+    title: 'Facilities Operations Specialist',
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150',
+  },
+  {
+    id: 'usr-201',
+    name: 'Alex Rivera',
+    email: 'alex@acme.com',
+    organizationId: 'org-acme-fin',
+    role: 'SecurityLead',
+    title: 'Staff SRE Commander',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150',
+  },
+  {
+    id: 'usr-301',
+    name: 'Sarah Jenkins',
+    email: 'sarah@nexus.com',
+    organizationId: 'org-nexus-cloud',
+    role: 'OrgAdmin',
+    title: 'Chief Security Officer',
+    avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&q=80&w=150',
   },
 ];
 

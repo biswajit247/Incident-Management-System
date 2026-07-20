@@ -10,6 +10,26 @@ export type IncidentStatus =
 
 export type IncidentSource = 'datadog' | 'prometheus' | 'user' | 'webhook' | 'api' | 'cloudwatch';
 
+export type UserRole = 'OrgAdmin' | 'SecurityLead' | 'Reporter';
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  organizationId: string;
+  role: UserRole;
+  avatar: string;
+  title: string;
+}
+
+export interface JWTPayload {
+  sub: string;
+  email: string;
+  orgId: string;
+  role: UserRole;
+  exp: number;
+}
+
 export interface Responder {
   id: string;
   name: string;

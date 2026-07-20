@@ -20,13 +20,15 @@ import {
 import { useIncidentStore } from '@/lib/store';
 import AlertSimulatorModal from './AlertSimulatorModal';
 import TenantSettingsModal from './TenantSettingsModal';
+import AuthModal from './AuthModal';
 import { Building2, Settings } from 'lucide-react';
 
 export default function Navigation() {
   const pathname = usePathname();
-  const { incidents, resetToDefault, organizations, activeOrgId, setActiveOrgId, activeOrganization } = useIncidentStore();
+  const { incidents, resetToDefault, organizations, activeOrgId, setActiveOrgId, activeOrganization, currentUser } = useIncidentStore();
   const [isSimModalOpen, setIsSimModalOpen] = useState(false);
   const [isTenantSettingsOpen, setIsTenantSettingsOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   const activeP1Count = incidents.filter(i => i.severity === 'P1' && i.status !== 'resolved').length;
   const activeTotalCount = incidents.filter(i => i.status !== 'resolved').length;
@@ -118,11 +120,33 @@ export default function Navigation() {
 
             <button
               onClick={() => setIsSimModalOpen(true)}
-              className="flex items-center space-x-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-300 hover:bg-amber-500/20 hover:border-amber-500/50 transition-all shadow-sm shadow-amber-500/10"
+              className="flex items-center space-x-1.5 rounded-lg bg-gradient-to-r from-amber-600 to-orange-600 px-3 py-1.5 text-xs font-semibold text-white hover:from-amber-500 hover:to-orange-500 transition-all shadow-md shadow-amber-500/10"
             >
-              <Radio className="h-4 w-4 text-amber-400 animate-pulse" />
+              <Radio className="h-4 w-4" />
               <span>Simulate Alert</span>
             </button>
+
+            {/* Authenticated User Profile Badge */}
+            {currentUser ? (
+              <button
+                onClick={() => setIsAuthModalOpen(true)}
+                className="flex items-center space-x-2 rounded-xl border border-gray-800 bg-gray-900/80 p-1 pr-2.5 text-xs text-left hover:border-gray-700 transition-all"
+                title="Click to Switch Tenant / Inspect Auth JWT Token"
+              >
+                <img src={currentUser.avatar} alt={currentUser.name} className="h-7 w-7 rounded-full object-cover border border-cyan-500/50" />
+                <div className="hidden sm:block">
+                  <div className="font-bold text-white leading-none text-[11px]">{currentUser.name}</div>
+                  <div className="text-[9px] font-mono text-cyan-400 mt-0.5">{currentUser.role}</div>
+                </div>
+              </button>
+            ) : (
+              <button
+                onClick={() => setIsAuthModalOpen(true)}
+                className="rounded-lg bg-cyan-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-cyan-500"
+              >
+                Login
+              </button>
+            )}
 
             <button
               onClick={resetToDefault}
@@ -175,6 +199,11 @@ export default function Navigation() {
       {/* Tenant SLA & Branding Settings Modal */}
       {isTenantSettingsOpen && (
         <TenantSettingsModal onClose={() => setIsTenantSettingsOpen(false)} />
+      )}
+
+      {/* User Authentication & JWT Inspector Modal */}
+      {isAuthModalOpen && (
+        <AuthModal onClose={() => setIsAuthModalOpen(false)} />
       )}
     </>
   );
