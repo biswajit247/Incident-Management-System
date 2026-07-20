@@ -10,7 +10,7 @@ interface IncidentOccurrenceFormModalProps {
 }
 
 export default function IncidentOccurrenceFormModal({ incident, onClose }: IncidentOccurrenceFormModalProps) {
-  const isKolkataIncident = incident?.id === 'INC-9043' || !incident;
+  const isKolkataIncident = incident?.id === 'PRO-9043' || incident?.id === 'INC-9043' || incident?.title?.toLowerCase().includes('kolkata') || !incident;
 
   const handlePrint = () => {
     window.print();

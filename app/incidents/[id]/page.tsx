@@ -35,6 +35,7 @@ export default function IncidentDetailPage() {
   const { 
     isLoaded, 
     incidents, 
+    allIncidents,
     timelineEvents, 
     acknowledgeIncident, 
     updateIncidentStatus, 
@@ -49,7 +50,11 @@ export default function IncidentDetailPage() {
 
   if (!isLoaded) return null;
 
-  const incident = incidents.find(i => i.id === id);
+  const incident = (allIncidents || incidents).find(i => 
+    i.id === id || 
+    i.id === `PRO-${id.replace('INC-', '')}` || 
+    i.id === `INC-${id.replace('PRO-', '')}`
+  );
 
   if (!incident) {
     return (

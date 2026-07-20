@@ -7,7 +7,7 @@ import { useIncidentStore } from '@/lib/store';
 import IncidentOccurrenceFormModal from '@/components/IncidentOccurrenceFormModal';
 
 export default function RcaListPage() {
-  const { isLoaded, rcaReports, incidents } = useIncidentStore();
+  const { isLoaded, rcaReports, incidents, allIncidents } = useIncidentStore();
   const [selectedIncidentForForm, setSelectedIncidentForForm] = useState<any>(null);
 
   if (!isLoaded) return null;
@@ -100,7 +100,7 @@ export default function RcaListPage() {
 
               <div className="mt-4 flex items-center justify-between pt-3 border-t border-gray-800/60 text-xs">
                 <button
-                  onClick={() => setSelectedIncidentForForm(incidents.find(i => i.id === report.incidentId) || { id: report.incidentId })}
+                  onClick={() => setSelectedIncidentForForm((allIncidents || incidents).find(i => i.id === report.incidentId || i.id === report.incidentId.replace('RCA-', 'PRO-') || i.id === report.incidentId.replace('RCA-', 'INC-')) || { id: report.incidentId, title: report.title })}
                   className="flex items-center space-x-1 font-semibold text-cyan-400 hover:underline"
                 >
                   <ShieldCheck className="h-3.5 w-3.5" />
