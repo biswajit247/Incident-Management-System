@@ -7,6 +7,7 @@ export const MOCK_ORGANIZATIONS: Organization[] = [
     name: 'Protiviti India Member Private Limited',
     subdomain: 'india.protiviti.com',
     prefix: 'PRO',
+    logoUrl: '/protiviti-logo.png',
     badgeColor: '#0891b2', // Cyan
     slaSettings: {
       P1: { ttaMins: 5, ttrMins: 30 },

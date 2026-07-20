@@ -49,11 +49,20 @@ export default function Navigation() {
           
           {/* Logo & Brand */}
           <div className="flex items-center space-x-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-red-600 via-rose-500 to-amber-500 p-0.5 shadow-lg shadow-red-500/20">
-              <div className="flex h-full w-full items-center justify-center rounded-[10px] bg-gray-950">
-                <ShieldAlert className="h-5 w-5 text-red-500 animate-pulse" />
+            <div className="flex items-center space-x-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-red-600 via-rose-500 to-amber-500 p-0.5 shadow-lg shadow-red-500/20">
+                <div className="flex h-full w-full items-center justify-center rounded-[10px] bg-gray-950">
+                  <ShieldAlert className="h-5 w-5 text-red-500 animate-pulse" />
+                </div>
               </div>
+
+              {activeOrganization?.logoUrl && (
+                <div className="hidden sm:flex h-10 items-center rounded-xl border border-gray-800 bg-gray-900/90 px-2 py-1 shadow-sm">
+                  <img src={activeOrganization.logoUrl} alt={activeOrganization.name} className="h-6 object-contain" />
+                </div>
+              )}
             </div>
+
             <div>
               <div className="flex items-center space-x-2">
                 <span className="font-bold tracking-tight text-white text-lg">SENTINEL</span>

@@ -56,9 +56,12 @@ export default function IncidentOccurrenceFormModal({ incident, onClose }: Incid
           
           {/* Document Header Logo */}
           <div className="flex items-center justify-between border-b-2 border-gray-300 pb-3">
-            <div>
-              <div className="text-xl font-bold tracking-tight text-cyan-800 italic leading-none">protiviti</div>
-              <div className="text-[10px] font-bold text-gray-700 uppercase tracking-wider mt-0.5">Protiviti India Member Private Limited</div>
+            <div className="flex items-center space-x-3">
+              <img src="/protiviti-logo.png" alt="Protiviti Logo" className="h-10 object-contain bg-slate-900 px-2 py-1 rounded" />
+              <div>
+                <div className="text-[11px] font-bold text-gray-800 uppercase tracking-wider">Protiviti India Member Private Limited</div>
+                <div className="text-[9px] text-gray-500 font-mono">Global Business Consulting • Risk & Compliance</div>
+              </div>
             </div>
             <div className="text-right text-[10px] text-gray-500 font-mono">CS-IOF-PRO/Dec 25</div>
           </div>
