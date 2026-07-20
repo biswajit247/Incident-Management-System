@@ -49,7 +49,7 @@ export default function Navigation() {
           
           {/* Logo & Brand */}
           <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-red-600 via-rose-500 to-amber-500 p-0.5 shadow-lg shadow-red-500/20">
                 <div className="flex h-full w-full items-center justify-center rounded-[10px] bg-gray-950">
                   <ShieldAlert className="h-5 w-5 text-red-500 animate-pulse" />
@@ -57,8 +57,8 @@ export default function Navigation() {
               </div>
 
               {activeOrganization?.logoUrl && (
-                <div className="hidden sm:flex h-10 items-center rounded-xl border border-gray-800 bg-gray-900/90 px-2 py-1 shadow-sm">
-                  <img src={activeOrganization.logoUrl} alt={activeOrganization.name} className="h-6 object-contain" />
+                <div className="flex h-10 items-center rounded-xl border border-cyan-500/40 bg-slate-900/90 px-3 py-1 shadow-md shadow-cyan-500/10">
+                  <img src={activeOrganization.logoUrl} alt={activeOrganization.name} className="h-7 object-contain" />
                 </div>
               )}
             </div>
@@ -196,6 +196,15 @@ export default function Navigation() {
                 </Link>
               );
             })}
+
+            {/* Dedicated Organization SLA Settings Tab */}
+            <button
+              onClick={() => setIsTenantSettingsOpen(true)}
+              className="flex items-center space-x-2 whitespace-nowrap border-b-2 border-transparent px-3 py-2.5 text-xs font-bold text-cyan-400 hover:border-cyan-500 hover:bg-cyan-500/10 transition-all ml-auto"
+            >
+              <Building2 className="h-4 w-4 text-cyan-400" />
+              <span>🏢 Organization SLA & Branding</span>
+            </button>
           </div>
         </nav>
       </header>
