@@ -156,7 +156,7 @@ export default function IncidentStepperForm() {
           </div>
           <div>
             <h1 className="text-xl font-bold text-white">Incident Occurrence Form (IOF) Wizard</h1>
-            <p className="text-xs text-gray-400">Multi-Step Enterprise Entry • Document CS-IOF-PRO/Dec 25</p>
+            <p className="text-xs text-gray-400">Protiviti India Member Private Limited • Standard CS-IOF-PRO/Dec 25</p>
           </div>
         </div>
 

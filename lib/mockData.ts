@@ -4,7 +4,7 @@ import { calculateSLADeadlines } from './slaUtils';
 export const MOCK_ORGANIZATIONS: Organization[] = [
   {
     id: 'org-protiviti-in',
-    name: 'Protiviti India',
+    name: 'Protiviti India Member Private Limited',
     subdomain: 'india.protiviti.com',
     prefix: 'PRO',
     badgeColor: '#0891b2', // Cyan
