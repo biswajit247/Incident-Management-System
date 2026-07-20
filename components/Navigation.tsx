@@ -195,7 +195,16 @@ export default function Navigation() {
               className="flex items-center space-x-2 whitespace-nowrap border-b-2 border-transparent px-3 py-2.5 text-xs font-bold text-cyan-400 hover:border-cyan-500 hover:bg-cyan-500/10 transition-all ml-auto"
             >
               <Building2 className="h-4 w-4 text-cyan-400" />
-              <span>🏢 Organization SLA & Branding</span>
+              <span>🏢 Organization SLA</span>
+            </button>
+
+            {/* Dedicated Auth & JWT Token Inspector Tab */}
+            <button
+              onClick={() => setIsAuthModalOpen(true)}
+              className="flex items-center space-x-2 whitespace-nowrap border-b-2 border-transparent px-3 py-2.5 text-xs font-bold text-purple-400 hover:border-purple-500 hover:bg-purple-500/10 transition-all"
+            >
+              <ShieldCheck className="h-4 w-4 text-purple-400" />
+              <span>🔑 User Auth & JWT Token</span>
             </button>
           </div>
         </nav>
