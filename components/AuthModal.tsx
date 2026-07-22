@@ -22,8 +22,6 @@ export default function AuthModal({ onClose }: AuthModalProps) {
   // Auto-detect organization based on email domain
   const detectedOrg = React.useMemo(() => {
     if (email.includes('@protiviti.com')) return organizations.find(o => o.id === 'org-protiviti-in');
-    if (email.includes('@acme.com')) return organizations.find(o => o.id === 'org-acme-fin');
-    if (email.includes('@nexus.com')) return organizations.find(o => o.id === 'org-nexus-cloud');
     return null;
   }, [email, organizations]);
 

@@ -17,34 +17,6 @@ export const MOCK_ORGANIZATIONS: Organization[] = [
     },
     createdAt: new Date().toISOString(),
   },
-  {
-    id: 'org-acme-fin',
-    name: 'Acme Financial Systems',
-    subdomain: 'fin.acme.io',
-    prefix: 'ACME',
-    badgeColor: '#10b981', // Emerald
-    slaSettings: {
-      P1: { ttaMins: 3, ttrMins: 15 },
-      P2: { ttaMins: 10, ttrMins: 60 },
-      P3: { ttaMins: 30, ttrMins: 240 },
-      P4: { ttaMins: 120, ttrMins: 720 },
-    },
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 'org-nexus-cloud',
-    name: 'Nexus Cloud Infrastructure',
-    subdomain: 'cloud.nexus.net',
-    prefix: 'NEX',
-    badgeColor: '#8b5cf6', // Violet
-    slaSettings: {
-      P1: { ttaMins: 10, ttrMins: 60 },
-      P2: { ttaMins: 30, ttrMins: 240 },
-      P3: { ttaMins: 120, ttrMins: 960 },
-      P4: { ttaMins: 480, ttrMins: 2880 },
-    },
-    createdAt: new Date().toISOString(),
-  },
 ];
 
 export const MOCK_USERS: User[] = [
@@ -74,24 +46,6 @@ export const MOCK_USERS: User[] = [
     role: 'Reporter',
     title: 'Facilities Operations Specialist',
     avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150',
-  },
-  {
-    id: 'usr-201',
-    name: 'Aniruddha Kar',
-    email: 'aniruddha@acme.com',
-    organizationId: 'org-acme-fin',
-    role: 'SecurityLead',
-    title: 'Staff SRE Commander',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150',
-  },
-  {
-    id: 'usr-301',
-    name: 'Biswajit Naskar',
-    email: 'biswajit@nexus.com',
-    organizationId: 'org-nexus-cloud',
-    role: 'OrgAdmin',
-    title: 'Chief Security Officer',
-    avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&q=80&w=150',
   },
 ];
 

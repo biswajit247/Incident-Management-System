@@ -25,7 +25,7 @@ export interface NotificationLog {
   status: 'DELIVERED' | 'SENT' | 'FAILED';
 }
 
-const STORAGE_KEY = 'incident_system_state_v4';
+const STORAGE_KEY = 'incident_system_state_v5';
 
 export function useIncidentStore() {
   const [organizations, setOrganizations] = useState<Organization[]>(MOCK_ORGANIZATIONS);

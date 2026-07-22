@@ -70,33 +70,19 @@ export default function Navigation() {
                 </span>
               </div>
               
-              {/* Organization Tenant Switcher Dropdown */}
+              {/* Organization Tenant Branding */}
               <div className="flex items-center space-x-1.5 mt-0.5">
                 <Building2 className="h-3 w-3 text-cyan-400" />
-                <select
-                  value={activeOrgId}
-                  onChange={(e) => setActiveOrgId(e.target.value)}
-                  className="bg-transparent font-bold text-xs text-cyan-300 focus:outline-none cursor-pointer hover:underline"
+                <span className="font-bold text-xs text-cyan-300">
+                  Protiviti India Member Private Limited (PRO)
+                </span>
+                <button
+                  onClick={() => setIsTenantSettingsOpen(true)}
+                  className="text-gray-400 hover:text-white"
+                  title="Organization SLA & Branding Settings"
                 >
-                  {organizations.map(org => (
-                    <option key={org.id} value={org.id} className="bg-gray-900 text-gray-200">
-                      🏢 {org.name} ({org.prefix})
-                    </option>
-                  ))}
-                  <option value="ALL" className="bg-gray-900 text-amber-300 font-bold">
-                    🌐 Global Master View (Super Admin)
-                  </option>
-                </select>
-
-                {activeOrgId !== 'ALL' && (
-                  <button
-                    onClick={() => setIsTenantSettingsOpen(true)}
-                    className="text-gray-400 hover:text-white"
-                    title="Organization SLA & Branding Settings"
-                  >
-                    <Settings className="h-3 w-3" />
-                  </button>
-                )}
+                  <Settings className="h-3 w-3" />
+                </button>
               </div>
             </div>
           </div>
