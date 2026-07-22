@@ -107,8 +107,8 @@ export default function AlertSimulatorModal({ onClose }: AlertSimulatorModalProp
               <Radio className="h-5 w-5 animate-pulse" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white">Alert Ingestion & Incident Simulator</h2>
-              <p className="text-xs text-gray-400">Simulate incoming monitoring webhooks & automated escalation rules</p>
+              <h2 className="text-lg font-bold text-white">Operational Alert Dispatcher</h2>
+              <p className="text-xs text-gray-400">Manually dispatch monitoring webhooks & trigger automated escalation rules</p>
             </div>
           </div>
           <button 
@@ -229,7 +229,7 @@ export default function AlertSimulatorModal({ onClose }: AlertSimulatorModalProp
             className="flex items-center space-x-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-600 px-5 py-2 text-xs font-bold text-gray-950 hover:from-amber-400 hover:to-orange-500 shadow-md shadow-amber-500/20"
           >
             <Send className="h-4 w-4" />
-            <span>{isInjecting ? 'Simulating Intake...' : 'Trigger Webhook & Auto-Route'}</span>
+            <span>{isInjecting ? 'Dispatching Payload...' : 'Dispatch Webhook & Route Alert'}</span>
           </button>
         </div>
 
