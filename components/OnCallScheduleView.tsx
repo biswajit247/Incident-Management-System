@@ -14,16 +14,43 @@ import {
   Layers,
   Plus,
   X,
-  Calendar
+  Calendar,
+  Radio
 } from 'lucide-react';
 import { useIncidentStore } from '@/lib/store';
 import { OnCallShift } from '@/lib/types';
 import { MOCK_RESPONDERS } from '@/lib/mockData';
 
+interface PagerLogEntry {
+  timestamp: string;
+  recipient: string;
+  tier: string;
+  mode: 'SMS' | 'Voice' | 'Push';
+  status: 'PENDING' | 'SENT' | 'DELIVERED';
+}
+
 export default function OnCallScheduleView() {
   const { shifts, notifications, createOnCallShift } = useIncidentStore();
   const [selectedShift, setSelectedShift] = useState<OnCallShift>(shifts[0] || shifts[0]);
   const [testPagedMsg, setTestPagedMsg] = useState<string | null>(null);
+
+  // Twilio Pager Logs state
+  const [pagerLogs, setPagerLogs] = useState<PagerLogEntry[]>([
+    {
+      timestamp: new Date(Date.now() - 30 * 60 * 1000).toLocaleTimeString(),
+      recipient: 'Biswajit Naskar',
+      tier: 'Tier 1 Primary',
+      mode: 'SMS',
+      status: 'DELIVERED',
+    },
+    {
+      timestamp: new Date(Date.now() - 25 * 60 * 1000).toLocaleTimeString(),
+      recipient: 'Aniruddha Kar',
+      tier: 'Tier 2 Backup',
+      mode: 'Voice',
+      status: 'DELIVERED',
+    }
+  ]);
 
   // Modal form states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,9 +63,37 @@ export default function OnCallScheduleView() {
   const [shiftStart, setShiftStart] = useState('09:00');
   const [shiftEnd, setShiftEnd] = useState('17:00');
 
-  const handleTestPager = (recipientName: string) => {
-    setTestPagedMsg(`Twilio dispatch successful: SMS & Voice Pager alert sent to ${recipientName}`);
+  const handleTestPager = (recipientName: string, tier: string) => {
+    const newEntry: PagerLogEntry = {
+      timestamp: new Date().toLocaleTimeString(),
+      recipient: recipientName,
+      tier,
+      mode: Math.random() > 0.5 ? 'SMS' : 'Voice',
+      status: 'PENDING',
+    };
+
+    setPagerLogs(prev => [newEntry, ...prev]);
+    setTestPagedMsg(`Twilio dispatch successful: Pager queued for ${recipientName}`);
     setTimeout(() => setTestPagedMsg(null), 4000);
+
+    // Simulate Twilio API status callbacks
+    setTimeout(() => {
+      setPagerLogs(prev => prev.map(log => {
+        if (log.recipient === recipientName && log.status === 'PENDING') {
+          return { ...log, status: 'SENT' };
+        }
+        return log;
+      }));
+    }, 1000);
+
+    setTimeout(() => {
+      setPagerLogs(prev => prev.map(log => {
+        if (log.recipient === recipientName && log.status === 'SENT') {
+          return { ...log, status: 'DELIVERED' };
+        }
+        return log;
+      }));
+    }, 2500);
   };
 
   const handleCreateShift = (e: React.FormEvent) => {
@@ -153,7 +208,7 @@ export default function OnCallScheduleView() {
                     </div>
                   </div>
                   <button
-                    onClick={(e) => { e.stopPropagation(); handleTestPager(shift.tier1.name); }}
+                    onClick={(e) => { e.stopPropagation(); handleTestPager(shift.tier1.name, 'Tier 1 Primary'); }}
                     className="flex items-center space-x-1 rounded-lg border border-red-500/40 bg-red-500/20 px-2 py-1 text-[10px] font-bold text-red-300 hover:bg-red-500/30"
                   >
                     <BellRing className="h-3 w-3" />
@@ -183,7 +238,7 @@ export default function OnCallScheduleView() {
                     </div>
                   </div>
                   <button
-                    onClick={(e) => { e.stopPropagation(); handleTestPager(shift.tier2.name); }}
+                    onClick={(e) => { e.stopPropagation(); handleTestPager(shift.tier2.name, 'Tier 2 Backup'); }}
                     className="flex items-center space-x-1 rounded-lg border border-amber-500/40 bg-amber-500/20 px-2 py-1 text-[10px] font-bold text-amber-300 hover:bg-amber-500/30"
                   >
                     <BellRing className="h-3 w-3" />
@@ -259,6 +314,61 @@ export default function OnCallScheduleView() {
             <p className="text-xs text-gray-300 mt-1">Locks Incident post-resolution until mandatory Root Cause Analysis report is generated.</p>
           </div>
 
+        </div>
+      </div>
+
+      {/* Twilio Pager Logs Console */}
+      <div className="rounded-2xl border border-gray-800 bg-gray-900/60 p-6 backdrop-blur-md">
+        <div className="flex items-center justify-between border-b border-gray-800 pb-3 mb-4">
+          <div className="flex items-center space-x-2">
+            <Radio className="h-4.5 w-4.5 text-cyan-400 animate-pulse" />
+            <div>
+              <h3 className="font-bold text-white text-base">Twilio Pager Dispatch & API Callback Logs</h3>
+              <p className="text-[10px] text-gray-500 font-mono">Live callback status tracker for automated escalation routing</p>
+            </div>
+          </div>
+          <span className="rounded bg-gray-950 text-cyan-400 border border-gray-850 px-2 py-0.5 text-[9px] font-mono font-semibold animate-pulse">
+            ● TWILIO API ONLINE
+          </span>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs font-mono text-gray-400">
+            <thead>
+              <tr className="border-b border-gray-850 text-gray-500 text-[10px] uppercase font-bold">
+                <th className="pb-2">Time</th>
+                <th className="pb-2">Recipient</th>
+                <th className="pb-2">Escalation Tier</th>
+                <th className="pb-2">Channel</th>
+                <th className="pb-2 text-right">Delivery Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-850">
+              {pagerLogs.map((log, idx) => (
+                <tr key={idx} className="hover:bg-gray-950/20 transition-all">
+                  <td className="py-2.5 text-gray-400">{log.timestamp}</td>
+                  <td className="py-2.5 font-bold text-white">{log.recipient}</td>
+                  <td className="py-2.5 text-cyan-400 font-semibold">{log.tier}</td>
+                  <td className="py-2.5">
+                    <span className="rounded bg-gray-800/80 px-2 py-0.5 text-[9px] font-bold text-gray-300">
+                      {log.mode}
+                    </span>
+                  </td>
+                  <td className="py-2.5 text-right">
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                      log.status === 'DELIVERED' 
+                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
+                        : log.status === 'SENT'
+                        ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                        : 'bg-amber-500/20 text-amber-400 border border-amber-500/30 animate-pulse'
+                    }`}>
+                      {log.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
