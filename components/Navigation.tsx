@@ -21,7 +21,7 @@ import { useIncidentStore } from '@/lib/store';
 import AlertSimulatorModal from './AlertSimulatorModal';
 import TenantSettingsModal from './TenantSettingsModal';
 import AuthModal from './AuthModal';
-import { Building2, Settings } from 'lucide-react';
+import { Building2, Settings, ShieldCheck } from 'lucide-react';
 
 export default function Navigation() {
   const pathname = usePathname();
