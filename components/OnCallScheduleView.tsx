@@ -11,19 +11,63 @@ import {
   CheckCircle2, 
   BellRing, 
   Zap, 
-  Layers 
+  Layers,
+  Plus,
+  X,
+  Calendar
 } from 'lucide-react';
 import { useIncidentStore } from '@/lib/store';
 import { OnCallShift } from '@/lib/types';
+import { MOCK_RESPONDERS } from '@/lib/mockData';
 
 export default function OnCallScheduleView() {
-  const { shifts, notifications } = useIncidentStore();
+  const { shifts, notifications, createOnCallShift } = useIncidentStore();
   const [selectedShift, setSelectedShift] = useState<OnCallShift>(shifts[0] || shifts[0]);
   const [testPagedMsg, setTestPagedMsg] = useState<string | null>(null);
+
+  // Modal form states
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [teamName, setTeamName] = useState('');
+  const [service, setService] = useState('Platform & DB');
+  const [escalationTimeout, setEscalationTimeout] = useState(15);
+  const [tier1Id, setTier1Id] = useState(MOCK_RESPONDERS[0]?.id || '');
+  const [tier2Id, setTier2Id] = useState(MOCK_RESPONDERS[1]?.id || '');
+  const [execId, setExecId] = useState(MOCK_RESPONDERS[2]?.id || '');
+  const [shiftStart, setShiftStart] = useState('09:00');
+  const [shiftEnd, setShiftEnd] = useState('17:00');
 
   const handleTestPager = (recipientName: string) => {
     setTestPagedMsg(`Twilio dispatch successful: SMS & Voice Pager alert sent to ${recipientName}`);
     setTimeout(() => setTestPagedMsg(null), 4000);
+  };
+
+  const handleCreateShift = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!teamName.trim()) return;
+
+    const t1 = MOCK_RESPONDERS.find(r => r.id === tier1Id) || MOCK_RESPONDERS[0];
+    const t2 = MOCK_RESPONDERS.find(r => r.id === tier2Id) || MOCK_RESPONDERS[1];
+    const exec = MOCK_RESPONDERS.find(r => r.id === execId) || MOCK_RESPONDERS[2];
+
+    const newShift: OnCallShift = {
+      id: `shift-${Date.now()}`,
+      organizationId: 'org-protiviti-in',
+      teamName,
+      service,
+      escalationTimeoutMins: Number(escalationTimeout),
+      tier1: t1,
+      tier2: t2,
+      executiveEscalation: exec,
+      shiftStart,
+      shiftEnd
+    };
+
+    createOnCallShift(newShift);
+    setSelectedShift(newShift);
+    
+    // reset form
+    setTeamName('');
+    setIsModalOpen(false);
   };
 
   return (
@@ -44,12 +88,21 @@ export default function OnCallScheduleView() {
             </p>
           </div>
 
-          {testPagedMsg && (
-            <div className="flex items-center space-x-2 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-2 text-xs font-semibold text-emerald-300 animate-pulse">
-              <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-              <span>{testPagedMsg}</span>
-            </div>
-          )}
+          <div className="flex items-center space-x-3">
+            {testPagedMsg && (
+              <div className="flex items-center space-x-2 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-4 py-2 text-xs font-semibold text-emerald-300 animate-pulse">
+                <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                <span>{testPagedMsg}</span>
+              </div>
+            )}
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center space-x-1.5 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 px-4 py-2 text-xs font-bold text-white shadow-md shadow-cyan-500/20"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Create On-Call Rotation</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -208,6 +261,150 @@ export default function OnCallScheduleView() {
 
         </div>
       </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-fadeIn">
+          <div className="relative w-full max-w-lg rounded-2xl border border-gray-800 bg-gray-950 p-6 shadow-2xl">
+            <button 
+              onClick={() => setIsModalOpen(false)}
+              className="absolute right-4 top-4 text-gray-400 hover:text-white"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <div className="flex items-center space-x-2 font-bold text-white text-base border-b border-gray-800 pb-3 mb-4">
+              <Calendar className="h-5 w-5 text-cyan-400" />
+              <span>Create On-Call Rotation Shift</span>
+            </div>
+
+            <form onSubmit={handleCreateShift} className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-gray-400">Rotation Team Name</label>
+                <input 
+                  type="text" 
+                  value={teamName}
+                  onChange={e => setTeamName(e.target.value)}
+                  placeholder="e.g. Kolkata NOC Command, SecOps Shift A"
+                  required
+                  className="mt-1 w-full rounded-xl border border-gray-800 bg-gray-900 px-3 py-2 text-xs text-white focus:border-cyan-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-gray-400">Monitored Service</label>
+                  <select
+                    value={service}
+                    onChange={e => setService(e.target.value)}
+                    className="mt-1 w-full rounded-xl border border-gray-800 bg-gray-900 px-3 py-2 text-xs text-white focus:border-cyan-500 focus:outline-none"
+                  >
+                    <option value="Platform & DB">Platform & DB</option>
+                    <option value="Security & Auth">Security & Auth</option>
+                    <option value="SRE Core">SRE Core</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-gray-400">Escalation Timeout (mins)</label>
+                  <input 
+                    type="number"
+                    value={escalationTimeout}
+                    onChange={e => setEscalationTimeout(Number(e.target.value))}
+                    min="1"
+                    max="60"
+                    required
+                    className="mt-1 w-full rounded-xl border border-gray-800 bg-gray-900 px-3 py-2 text-xs text-white focus:border-cyan-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-gray-400">Tier 1 Primary</label>
+                  <select
+                    value={tier1Id}
+                    onChange={e => setTier1Id(e.target.value)}
+                    className="mt-1 w-full rounded-xl border border-gray-800 bg-gray-900 px-2..5 py-2 text-[11px] text-white focus:border-cyan-500 focus:outline-none"
+                  >
+                    {MOCK_RESPONDERS.map(r => (
+                      <option key={r.id} value={r.id}>{r.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-gray-400">Tier 2 Backup</label>
+                  <select
+                    value={tier2Id}
+                    onChange={e => setTier2Id(e.target.value)}
+                    className="mt-1 w-full rounded-xl border border-gray-800 bg-gray-900 px-2.5 py-2 text-[11px] text-white focus:border-cyan-500 focus:outline-none"
+                  >
+                    {MOCK_RESPONDERS.map(r => (
+                      <option key={r.id} value={r.id}>{r.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-gray-400">Executive Escalation</label>
+                  <select
+                    value={execId}
+                    onChange={e => setExecId(e.target.value)}
+                    className="mt-1 w-full rounded-xl border border-gray-800 bg-gray-900 px-2.5 py-2 text-[11px] text-white focus:border-cyan-500 focus:outline-none"
+                  >
+                    {MOCK_RESPONDERS.map(r => (
+                      <option key={r.id} value={r.id}>{r.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-gray-400">Shift Start Time</label>
+                  <input 
+                    type="text" 
+                    value={shiftStart}
+                    onChange={e => setShiftStart(e.target.value)}
+                    placeholder="09:00"
+                    required
+                    className="mt-1 w-full rounded-xl border border-gray-800 bg-gray-900 px-3 py-2 text-xs text-white focus:border-cyan-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-gray-400">Shift End Time</label>
+                  <input 
+                    type="text" 
+                    value={shiftEnd}
+                    onChange={e => setShiftEnd(e.target.value)}
+                    placeholder="17:00"
+                    required
+                    className="mt-1 w-full rounded-xl border border-gray-800 bg-gray-900 px-3 py-2 text-xs text-white focus:border-cyan-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end space-x-3 pt-3 border-t border-gray-900">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="rounded-xl border border-gray-800 bg-gray-900 px-4 py-2 text-xs font-semibold text-gray-400 hover:text-white"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 px-5 py-2 text-xs font-bold text-white shadow-md shadow-cyan-500/20"
+                >
+                  Create Rotation
+                </button>
+              </div>
+            </form>
+
+          </div>
+        </div>
+      )}
 
     </div>
   );

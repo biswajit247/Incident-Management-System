@@ -408,6 +408,11 @@ export function useIncidentStore() {
     setJwtToken(null);
   };
 
+  // Create On Call Shift Rotation
+  const createOnCallShift = (shift: OnCallShift) => {
+    setShifts(prev => [...prev, shift]);
+  };
+
   return {
     isLoaded,
     currentUser,
@@ -435,6 +440,7 @@ export function useIncidentStore() {
     addWarRoomMessage,
     addTimelineNote,
     saveRcaReport,
+    createOnCallShift,
     resetToDefault,
   };
 }
