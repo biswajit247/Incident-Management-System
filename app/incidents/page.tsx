@@ -31,7 +31,7 @@ export default function IncidentsPage() {
   const [newTitle, setNewTitle] = useState('');
   const [newDesc, setNewDesc] = useState('');
   const [newSev, setNewSev] = useState<Severity>('P2');
-  const [newService, setNewService] = useState('Payments Engine');
+  const [newService, setNewService] = useState('Platform & DB');
 
   if (!isLoaded) return null;
 

@@ -121,7 +121,7 @@ export const MOCK_RESPONDERS: Responder[] = [
     role: 'Senior Backend Lead',
     email: 'david.chen@company.internal',
     phone: '+1 (555) 431-9022',
-    team: 'Payments Engine',
+    team: 'Core Platform',
   },
   {
     id: 'resp-4',
@@ -153,31 +153,6 @@ const p3Sla = calculateSLADeadlines(minutesAgo(90), 'P3');
 const p4Sla = calculateSLADeadlines(minutesAgo(180), 'P4');
 
 export const INITIAL_INCIDENTS: Incident[] = [
-  {
-    id: 'PRO-9042',
-    organizationId: 'org-protiviti-in',
-    title: 'Payment Gateway API 504 Timeouts on Checkout API Gateway',
-    description: 'Datadog Alert: Payment Service HTTP 5xx error rate exceeded 18.5% threshold. Spike in Stripe connection pool exhaustion during peak transaction load.',
-    severity: 'P1',
-    status: 'investigating',
-    service: 'Payments Engine',
-    createdAt: minutesAgo(12),
-    acknowledgedAt: minutesAgo(10),
-    assignedTo: MOCK_RESPONDERS[2], // Aniruddha Kar
-    ttaDeadline: p1Sla.ttaDeadline,
-    ttrDeadline: p1Sla.ttrDeadline,
-    ttaBreached: false,
-    ttrBreached: false,
-    source: 'datadog',
-    warRoomUrl: 'https://warroom.company.internal/PRO-9042',
-    videoBridgeUrl: 'https://meet.jit.si/Incident-Command-PRO-9042',
-    tags: ['stripe', 'checkout', 'p1-outage', 'connection-pool'],
-    affectedMetrics: {
-      errorRate: '18.5%',
-      latencyP99: '4,250 ms',
-      cpu: '94%',
-    },
-  },
   {
     id: 'PRO-9041',
     organizationId: 'org-protiviti-in',
@@ -287,48 +262,6 @@ export const INITIAL_INCIDENTS: Incident[] = [
 ];
 
 export const INITIAL_TIMELINE_EVENTS: Record<string, TimelineEvent[]> = {
-  'INC-9042': [
-    {
-      id: 'te-1',
-      incidentId: 'INC-9042',
-      timestamp: minutesAgo(12),
-      type: 'alert_ingested',
-      author: 'Datadog Ingestor',
-      content: 'Alert triggered: Payment Gateway HTTP 5xx error rate exceeded 18.5%',
-    },
-    {
-      id: 'te-2',
-      incidentId: 'INC-9042',
-      timestamp: minutesAgo(11),
-      type: 'escalation',
-      author: 'Automated Routing Engine',
-      content: 'Routed ticket to Tier 1 On-Call: Aniruddha Kar (Payments Engine)',
-    },
-    {
-      id: 'te-3',
-      incidentId: 'INC-9042',
-      timestamp: minutesAgo(10),
-      type: 'responder_assigned',
-      author: 'Aniruddha Kar',
-      content: 'Incident acknowledged by Aniruddha Kar. SLA TTA satisfied in 2 minutes.',
-    },
-    {
-      id: 'te-4',
-      incidentId: 'INC-9042',
-      timestamp: minutesAgo(7),
-      type: 'status_change',
-      author: 'Aniruddha Kar',
-      content: 'Changed status to Investigating. Auto-provisioned War Room & Video Bridge.',
-    },
-    {
-      id: 'te-5',
-      incidentId: 'INC-9042',
-      timestamp: minutesAgo(3),
-      type: 'note_added',
-      author: 'Aniruddha Kar',
-      content: 'Joined War Room. Inspected Stripe SDK logs; pool exhaustion confirmed. Increasing worker capacity pool by 2x.',
-    },
-  ],
   'INC-9041': [
     {
       id: 'te-10',
@@ -349,53 +282,9 @@ export const INITIAL_TIMELINE_EVENTS: Record<string, TimelineEvent[]> = {
   ],
 };
 
-export const INITIAL_WAR_ROOM_MESSAGES: Record<string, WarRoomMessage[]> = {
-  'INC-9042': [
-    {
-      id: 'wm-1',
-      incidentId: 'INC-9042',
-      sender: { name: 'System Sentinel', avatar: '/bot-avatar.png', role: 'Automation Bot' },
-      message: '🚨 War Room established for INC-9042 [P1 - Critical]. Paging Payment Infrastructure responders.',
-      timestamp: minutesAgo(12),
-      isSystem: true,
-    },
-    {
-      id: 'wm-2',
-      incidentId: 'INC-9042',
-      sender: { name: 'Aniruddha Kar', avatar: MOCK_RESPONDERS[2].avatar, role: 'Senior Backend Lead' },
-      message: 'I am taking point on this. Seeing 504 errors on Stripe payment intents. Connection pool maxed at 200 handles.',
-      timestamp: minutesAgo(10),
-    },
-    {
-      id: 'wm-3',
-      incidentId: 'INC-9042',
-      sender: { name: 'Biswajit Naskar', avatar: MOCK_RESPONDERS[1].avatar, role: 'Platform & DB' },
-      message: 'Checked the database connections from the payment pods. DB load looks normal, issue is outbound network socket timeout to Stripe API.',
-      timestamp: minutesAgo(6),
-    },
-    {
-      id: 'wm-4',
-      incidentId: 'INC-9042',
-      sender: { name: 'Aniruddha Kar', avatar: MOCK_RESPONDERS[0].avatar, role: 'Staff SRE Lead' },
-      message: 'Scaling payment service pods from 10 to 25 and enabling connection pooling keep-alive to flush stuck TCP sockets.',
-      timestamp: minutesAgo(2),
-    },
-  ],
-};
+export const INITIAL_WAR_ROOM_MESSAGES: Record<string, WarRoomMessage[]> = {};
 
 export const INITIAL_ON_CALL_SHIFTS: OnCallShift[] = [
-  {
-    id: 'shift-1',
-    organizationId: 'org-protiviti-in',
-    teamName: 'Payments & Checkout',
-    service: 'Payments Engine',
-    tier1: MOCK_RESPONDERS[2], // Aniruddha Kar
-    tier2: MOCK_RESPONDERS[0], // Aniruddha Kar
-    executiveEscalation: MOCK_RESPONDERS[1], // Biswajit Naskar
-    escalationTimeoutMins: 5,
-    shiftStart: '08:00 AM UTC',
-    shiftEnd: '08:00 PM UTC',
-  },
   {
     id: 'shift-2',
     organizationId: 'org-protiviti-in',

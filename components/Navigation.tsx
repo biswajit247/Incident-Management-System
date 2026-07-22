@@ -38,7 +38,6 @@ export default function Navigation() {
     { href: '/incidents', label: 'Incidents', icon: AlertTriangle, badge: activeTotalCount },
     { href: '/schedules', label: 'On-Call & Escalation', icon: Calendar },
     { href: '/rca', label: 'RCA & Post-Mortems', icon: FileText },
-    { href: '/alerts', label: 'API Ingress', icon: Radio },
     { href: '/analytics', label: 'SLA Analytics', icon: BarChart3 },
   ];
 

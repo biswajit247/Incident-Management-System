@@ -11,15 +11,6 @@ interface AlertDispatcherModalProps {
 
 const PRESETS = [
   {
-    name: 'Datadog: Payment Gateway 5xx Spike (P1)',
-    source: 'datadog' as const,
-    severity: 'P1' as Severity,
-    service: 'Payments Engine',
-    title: 'Payment Gateway HTTP 504 Timeout rate > 20% on Checkout Pods',
-    description: 'Datadog Synthetic Monitor alert: Connection pool exhaustion detected on outbound Stripe payment intent calls. 504 timeouts impacting live purchases.',
-    tags: ['stripe', 'payment', 'p1-outage'],
-  },
-  {
     name: 'Prometheus: DB Lock Saturation (P1)',
     source: 'prometheus' as const,
     severity: 'P1' as Severity,

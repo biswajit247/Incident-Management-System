@@ -57,7 +57,7 @@ export default function RcaEditor({ incident, existingRca }: RcaEditorProps) {
     existingRca?.actionItems || [
       {
         id: 'ai-1',
-        title: 'Upgrade connection pool default config across all payment microservices',
+        title: 'Upgrade connection pool default config across all database microservices',
         assignee: incident.assignedTo.name,
         status: 'in_progress',
         priority: 'high',
