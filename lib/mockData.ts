@@ -51,7 +51,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'usr-101',
     name: 'Biswajit Naskar',
-    email: 'shuvam@protiviti.com',
+    email: 'biswajit@protiviti.com',
     organizationId: 'org-protiviti-in',
     role: 'SecurityLead',
     title: 'Security Shift IC Lead',
@@ -69,7 +69,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'usr-103',
     name: 'Aniruddha Kar',
-    email: 'puja@protiviti.com',
+    email: 'aniruddha@protiviti.com',
     organizationId: 'org-protiviti-in',
     role: 'Reporter',
     title: 'Facilities Operations Specialist',
@@ -78,7 +78,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'usr-201',
     name: 'Aniruddha Kar',
-    email: 'alex@acme.com',
+    email: 'aniruddha@acme.com',
     organizationId: 'org-acme-fin',
     role: 'SecurityLead',
     title: 'Staff SRE Commander',
@@ -87,7 +87,7 @@ export const MOCK_USERS: User[] = [
   {
     id: 'usr-301',
     name: 'Biswajit Naskar',
-    email: 'sarah@nexus.com',
+    email: 'biswajit@nexus.com',
     organizationId: 'org-nexus-cloud',
     role: 'OrgAdmin',
     title: 'Chief Security Officer',

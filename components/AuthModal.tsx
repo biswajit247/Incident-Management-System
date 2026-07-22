@@ -13,7 +13,7 @@ interface AuthModalProps {
 export default function AuthModal({ onClose }: AuthModalProps) {
   const { currentUser, login, organizations } = useIncidentStore();
 
-  const [email, setEmail] = useState('shuvam@protiviti.com');
+  const [email, setEmail] = useState('biswajit@protiviti.com');
   const [password, setPassword] = useState('••••••••••••');
   const [jwtPayload, setJwtPayload] = useState<JWTPayload | null>(null);
   const [activeTab, setActiveTab] = useState<'login' | 'jwt'>('login');
