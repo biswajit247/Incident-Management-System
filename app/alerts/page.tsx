@@ -74,7 +74,7 @@ export default function AlertsPage() {
           className="flex items-center space-x-2 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 px-5 py-2.5 text-xs font-bold text-white hover:from-cyan-500 hover:to-blue-500 shadow-lg shadow-cyan-500/20"
         >
           <Play className="h-4 w-4 fill-white" />
-          <span>+ Trigger Emergency Alert</span>
+          <span>+ Dispatch Telemetry Alert</span>
         </button>
       </div>
 

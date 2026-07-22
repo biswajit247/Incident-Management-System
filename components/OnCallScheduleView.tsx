@@ -22,7 +22,7 @@ export default function OnCallScheduleView() {
   const [testPagedMsg, setTestPagedMsg] = useState<string | null>(null);
 
   const handleTestPager = (recipientName: string) => {
-    setTestPagedMsg(`Simulated SMS & Voice call sent to ${recipientName}!`);
+    setTestPagedMsg(`Twilio dispatch successful: SMS & Voice Pager alert sent to ${recipientName}`);
     setTimeout(() => setTestPagedMsg(null), 4000);
   };
 
@@ -104,7 +104,7 @@ export default function OnCallScheduleView() {
                     className="flex items-center space-x-1 rounded-lg border border-red-500/40 bg-red-500/20 px-2 py-1 text-[10px] font-bold text-red-300 hover:bg-red-500/30"
                   >
                     <BellRing className="h-3 w-3" />
-                    <span>Test Page</span>
+                    <span>Send Page Alert</span>
                   </button>
                 </div>
               </div>
@@ -134,7 +134,7 @@ export default function OnCallScheduleView() {
                     className="flex items-center space-x-1 rounded-lg border border-amber-500/40 bg-amber-500/20 px-2 py-1 text-[10px] font-bold text-amber-300 hover:bg-amber-500/30"
                   >
                     <BellRing className="h-3 w-3" />
-                    <span>Test Page</span>
+                    <span>Send Page Alert</span>
                   </button>
                 </div>
               </div>

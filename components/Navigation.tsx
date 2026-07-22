@@ -38,7 +38,7 @@ export default function Navigation() {
     { href: '/incidents', label: 'Incidents', icon: AlertTriangle, badge: activeTotalCount },
     { href: '/schedules', label: 'On-Call & Escalation', icon: Calendar },
     { href: '/rca', label: 'RCA & Post-Mortems', icon: FileText },
-    { href: '/alerts', label: 'Alert Ingestor', icon: Radio },
+    { href: '/alerts', label: 'API Ingress', icon: Radio },
     { href: '/analytics', label: 'SLA Analytics', icon: BarChart3 },
   ];
 
@@ -132,7 +132,7 @@ export default function Navigation() {
               className="flex items-center space-x-1.5 rounded-lg bg-gradient-to-r from-red-600 to-amber-600 px-3 py-1.5 text-xs font-semibold text-white hover:from-red-500 hover:to-amber-500 transition-all shadow-md shadow-red-500/10"
             >
               <Radio className="h-4 w-4" />
-              <span>+ Emergency Alert</span>
+              <span>+ Dispatch Alert</span>
             </button>
 
             {/* Authenticated User Profile Badge */}
