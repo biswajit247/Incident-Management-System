@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { BarChart3, Clock, CheckCircle2, ShieldAlert, TrendingDown, Layers, Zap } from 'lucide-react';
+import { BarChart3, Clock, CheckCircle2, ShieldAlert, TrendingDown, Layers, Zap, Printer } from 'lucide-react';
 import { useIncidentStore } from '@/lib/store';
 
 export default function AnalyticsPage() {
@@ -55,6 +55,103 @@ export default function AnalyticsPage() {
   const breaches = incidents.filter(i => i.ttaBreached || i.ttrBreached).length;
   const slaCompliancePct = total > 0 ? Math.round(((total - breaches) / total) * 100) : 98;
 
+  const handleExportSlaReport = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const incidentsListHtml = incidents.map(inc => `
+      <tr style="border-bottom: 1px solid #e2e8f0;">
+        <td style="padding: 8px; font-weight: bold; color: #1e293b; font-family: monospace;">${inc.id}</td>
+        <td style="padding: 8px; color: #334155;">${inc.title}</td>
+        <td style="padding: 8px; color: #475569; text-transform: uppercase; font-weight: bold;">${inc.severity}</td>
+        <td style="padding: 8px; color: #475569;">${inc.service}</td>
+        <td style="padding: 8px; font-weight: 600; color: ${inc.ttaBreached || inc.ttrBreached ? '#dc2626' : '#16a34a'}; font-family: sans-serif;">
+          ${inc.ttaBreached || inc.ttrBreached ? 'BREACHED' : 'COMPLIANT'}
+        </td>
+        <td style="padding: 8px; color: #475569;">${inc.status.toUpperCase()}</td>
+      </tr>
+    `).join('');
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Weekly_SLA_Report_${new Date().toLocaleDateString()}</title>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; }
+            h1 { color: #0f172a; border-bottom: 2px solid #cbd5e1; padding-bottom: 12px; margin-top: 0; font-size: 24px; }
+            h2 { color: #1e293b; margin-top: 24px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; font-size: 18px; }
+            .meta-grid { display: grid; grid-template-cols: repeat(4, 1fr); gap: 16px; margin: 20px 0; }
+            .meta-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; text-align: center; border-radius: 8px; }
+            .meta-label { font-size: 10px; font-weight: bold; color: #64748b; text-transform: uppercase; display: block; }
+            .meta-value { font-size: 14px; font-weight: bold; color: #334155; margin-top: 4px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+            th { text-align: left; background: #f1f5f9; padding: 10px; font-size: 12px; font-weight: bold; color: #475569; }
+            .brand { float: right; font-weight: 800; color: #0891b2; letter-spacing: 0.05em; font-size: 14px; }
+          </style>
+        </head>
+        <body>
+          <div class="brand">PROTIVITI SENTINEL</div>
+          <h1>Weekly SLA Performance & Reliability Report</h1>
+          
+          <div style="margin-bottom: 20px; font-size: 12px; color: #64748b;">
+            <strong>Organization:</strong> Protiviti India Member Private Limited &bull; 
+            <strong>Reporting Cycle:</strong> Last 7 Days &bull; 
+            <strong>Date Generated:</strong> ${new Date().toLocaleDateString()}
+          </div>
+
+          <h2>1. Executive Summary & Aggregated Performance Metrics</h2>
+          <div class="meta-grid">
+            <div class="meta-card">
+              <span class="meta-label">Total Incidents</span>
+              <span class="meta-value">${total}</span>
+            </div>
+            <div class="meta-card">
+              <span class="meta-label">SLA Compliance Rate</span>
+              <span class="meta-value" style="color: ${slaCompliancePct >= 95 ? '#16a34a' : '#dc2626'}">${slaCompliancePct}%</span>
+            </div>
+            <div class="meta-card">
+              <span class="meta-label">Average Ack Time (TTA)</span>
+              <span class="meta-value">3.4 minutes</span>
+            </div>
+            <div class="meta-card">
+              <span class="meta-label">Average Resolve Time (TTR)</span>
+              <span class="meta-value">41.8 minutes</span>
+            </div>
+          </div>
+
+          <h2>2. Incident SLA Audits Log</h2>
+          <table>
+            <thead>
+              <tr>
+                <th style="padding: 10px; text-align: left;">ID</th>
+                <th style="text-align: left;">Title</th>
+                <th style="text-align: left;">Severity</th>
+                <th style="text-align: left;">Service Area</th>
+                <th style="text-align: left;">SLA Compliance</th>
+                <th style="text-align: left;">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${incidentsListHtml}
+            </tbody>
+          </table>
+
+          <div style="margin-top: 50px; border-top: 1px solid #e2e8f0; padding-top: 20px; font-size: 12px; color: #64748b; text-align: center;">
+            <p>Generated automatically by Sentinel Command Center. Protected under Protiviti internal audits clearance policy.</p>
+          </div>
+
+          <script>
+            window.onload = function() {
+              window.print();
+              window.close();
+            }
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
   return (
     <div className="space-y-6">
       
@@ -66,6 +163,13 @@ export default function AnalyticsPage() {
             Analytics breakdown for Mean Time to Acknowledge (MTTA), Mean Time to Resolve (MTTR), and SLA targets
           </p>
         </div>
+        <button
+          onClick={handleExportSlaReport}
+          className="flex items-center space-x-1.5 rounded-xl border border-cyan-500/30 bg-cyan-950/20 px-4 py-2 text-xs font-bold text-cyan-300 hover:bg-cyan-500/20 transition-all shadow-md shadow-cyan-500/10"
+        >
+          <Printer className="h-4 w-4" />
+          <span>Export Weekly SLA Report</span>
+        </button>
       </div>
 
       {/* Top Metrics Cards */}
