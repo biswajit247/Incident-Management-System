@@ -13,8 +13,8 @@ interface AuthModalProps {
 export default function AuthModal({ onClose }: AuthModalProps) {
   const { currentUser, login, organizations } = useIncidentStore();
 
-  const [email, setEmail] = useState('biswajit@protiviti.com');
-  const [password, setPassword] = useState('••••••••••••');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [jwtPayload, setJwtPayload] = useState<JWTPayload | null>(null);
   const [activeTab, setActiveTab] = useState<'login' | 'jwt'>('login');
   const [ssoMode, setSsoMode] = useState(false);
@@ -103,32 +103,36 @@ export default function AuthModal({ onClose }: AuthModalProps) {
         {activeTab === 'login' ? (
           <div className="space-y-4">
             
-            {/* Quick User Selection */}
-            <div>
-              <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">
-                Quick Multi-Tenant User Profiles
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                {MOCK_USERS.map((user) => {
-                  const isSelected = currentUser?.email === user.email;
-                  return (
-                    <button
-                      key={user.id}
-                      onClick={() => handleQuickSelectUser(user)}
-                      className={`flex items-center space-x-2.5 p-2 rounded-xl border text-left text-xs transition-all ${
-                        isSelected 
-                          ? 'border-cyan-500 bg-cyan-500/10 text-white shadow-md shadow-cyan-500/10' 
-                          : 'border-gray-800 bg-gray-900/60 text-gray-300 hover:border-gray-700'
-                      }`}
-                    >
-                      <img src={user.avatar} alt={user.name} className="h-7 w-7 rounded-full object-cover border border-gray-700" />
-                      <div className="min-w-0 flex-1">
-                        <div className="font-bold text-white truncate">{user.name}</div>
-                        <div className="text-[10px] text-gray-400 truncate">{user.title} ({user.role})</div>
-                      </div>
-                    </button>
-                  );
-                })}
+            {/* Login Credentials Guide */}
+            <div className="rounded-xl border border-gray-800 bg-gray-950 p-4.5 space-y-2 text-xs">
+              <span className="block font-bold text-white uppercase tracking-wider text-[11px] text-cyan-400">
+                Enterprise Credentials Directory
+              </span>
+              
+              <div className="grid grid-cols-1 gap-2.5 pt-1.5 text-gray-300">
+                <div className="flex items-center justify-between border-b border-gray-900 pb-1.5">
+                  <div>
+                    <p className="font-bold text-white">Biswajit Naskar (SecurityLead)</p>
+                    <p className="font-mono text-[10px] text-gray-400">biswajit@protiviti.com</p>
+                  </div>
+                  <span className="font-mono text-[10px] text-cyan-400">pwd: password123</span>
+                </div>
+
+                <div className="flex items-center justify-between border-b border-gray-900 pb-1.5">
+                  <div>
+                    <p className="font-bold text-white">Rahul Lal (OrgAdmin)</p>
+                    <p className="font-mono text-[10px] text-gray-400">rahul.admin@protiviti.com</p>
+                  </div>
+                  <span className="font-mono text-[10px] text-cyan-400">pwd: password123</span>
+                </div>
+
+                <div className="flex items-center justify-between pb-0.5">
+                  <div>
+                    <p className="font-bold text-white">Aniruddha Kar (Reporter)</p>
+                    <p className="font-mono text-[10px] text-gray-400">aniruddha@protiviti.com</p>
+                  </div>
+                  <span className="font-mono text-[10px] text-cyan-400">pwd: password123</span>
+                </div>
               </div>
             </div>
 

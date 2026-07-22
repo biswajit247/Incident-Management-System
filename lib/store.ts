@@ -31,7 +31,7 @@ export function useIncidentStore() {
   const [organizations, setOrganizations] = useState<Organization[]>(MOCK_ORGANIZATIONS);
   const [activeOrgId, setActiveOrgId] = useState<string>('org-protiviti-in');
 
-  const [currentUser, setCurrentUser] = useState<User | null>(MOCK_USERS[0]); // Default: Biswajit Naskar (Protiviti)
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [jwtToken, setJwtToken] = useState<string | null>(null);
 
   const [rawIncidents, setIncidents] = useState<Incident[]>([]);
