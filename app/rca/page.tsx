@@ -71,10 +71,17 @@ export default function RcaListPage() {
                   </span>
                   <span className="font-mono text-xs font-bold text-gray-400">{report.id}</span>
                 </div>
-                <span className="flex items-center space-x-1 text-xs font-bold text-emerald-400">
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                  <span>REVIEWED</span>
-                </span>
+                {report.status === 'reviewed' ? (
+                  <span className="flex items-center space-x-1 text-xs font-bold text-emerald-400">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    <span>APPROVED</span>
+                  </span>
+                ) : (
+                  <span className="flex items-center space-x-1 text-xs font-bold text-amber-400">
+                    <Clock className="h-3.5 w-3.5" />
+                    <span>AWAITING SIGN-OFF</span>
+                  </span>
+                )}
               </div>
 
               <div className="mt-3">

@@ -23,8 +23,9 @@ interface RcaEditorProps {
 }
 
 export default function RcaEditor({ incident, existingRca }: RcaEditorProps) {
-  const { saveRcaReport } = useIncidentStore();
+  const { saveRcaReport, currentUser } = useIncidentStore();
   const [isSavedMsg, setIsSavedMsg] = useState(false);
+  const [status, setStatus] = useState<'draft' | 'completed' | 'reviewed'>(existingRca?.status || 'completed');
 
   const [summary, setSummary] = useState(existingRca?.summary || incident.description);
   const [durationMinutes, setDurationMinutes] = useState(existingRca?.impact.durationMinutes || 35);
@@ -100,7 +101,8 @@ export default function RcaEditor({ incident, existingRca }: RcaEditorProps) {
     setActionItems(prev => [...prev, newItem]);
   };
 
-  const handleSave = () => {
+  const handleSave = (finalStatus?: 'draft' | 'completed' | 'reviewed') => {
+    const nextStatus = finalStatus || status;
     const report: RcaReport = {
       id: existingRca?.id || `RCA-${incident.id.replace('INC-', '')}`,
       incidentId: incident.id,
@@ -122,10 +124,11 @@ export default function RcaEditor({ incident, existingRca }: RcaEditorProps) {
       detectionDetails,
       mitigationSteps,
       actionItems,
-      status: 'completed',
+      status: nextStatus,
     };
 
     saveRcaReport(report);
+    setStatus(nextStatus);
     setIsSavedMsg(true);
     setTimeout(() => setIsSavedMsg(false), 4000);
   };
@@ -318,12 +321,55 @@ ${actionItems.map(ai => `- [${ai.status === 'completed' ? 'x' : ' '}] **${ai.tit
             <span>PDF / Print Report</span>
           </button>
           <button
-            onClick={handleSave}
+            onClick={() => handleSave('completed')}
             className="flex items-center space-x-1.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 px-5 py-2 text-xs font-bold text-white hover:from-red-500 hover:to-rose-500 shadow-md shadow-red-500/20"
           >
             <Save className="h-4 w-4" />
             <span>Save & Complete RCA</span>
           </button>
+        </div>
+      </div>
+
+      {/* SLA Sign-off Approval Bar */}
+      <div className="rounded-2xl border border-gray-800 bg-gray-900/60 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 backdrop-blur-md">
+        <div className="flex items-center space-x-2.5">
+          <div className={`h-8 w-8 rounded-full flex items-center justify-center border ${
+            status === 'reviewed' 
+              ? 'bg-emerald-500/25 text-emerald-400 border-emerald-500/40' 
+              : 'bg-amber-500/25 text-amber-400 border-amber-500/40 animate-pulse'
+          }`}>
+            <ShieldCheck className="h-4.5 w-4.5" />
+          </div>
+          <div>
+            <span className="block text-[10px] font-bold text-gray-500 uppercase">Compliance Approval Status</span>
+            <span className="font-bold text-xs text-white">
+              {status === 'reviewed' 
+                ? '✓ Approved & Signed Off by Org Admin (Rahul Lal)' 
+                : '⚠️ Pending compliance approval sign-off'}
+            </span>
+          </div>
+        </div>
+
+        <div>
+          {status !== 'reviewed' ? (
+            currentUser?.role === 'OrgAdmin' ? (
+              <button
+                onClick={() => handleSave('reviewed')}
+                className="flex items-center space-x-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 px-4 py-2 text-xs font-bold text-white shadow-md shadow-emerald-500/20 transition-all"
+              >
+                <CheckCircle2 className="h-4 w-4" />
+                <span>Approve & Sign Off RCA</span>
+              </button>
+            ) : (
+              <span className="text-[11px] font-semibold text-gray-400 italic">
+                Please log in as <span className="text-cyan-400 font-mono">rahul.admin@protiviti.com</span> to sign off.
+              </span>
+            )
+          ) : (
+            <span className="rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 text-xs font-bold font-mono">
+              COMPLIANT REPORT
+            </span>
+          )}
         </div>
       </div>
 

@@ -356,6 +356,6 @@ export const INITIAL_RCA_REPORTS: RcaReport[] = [
         priority: 'medium',
       },
     ],
-    status: 'reviewed',
+    status: 'completed',
   },
 ];
