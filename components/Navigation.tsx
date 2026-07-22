@@ -15,7 +15,8 @@ import {
   Activity, 
   Bell, 
   CheckCircle2, 
-  RefreshCw 
+  RefreshCw,
+  MessageSquareCode
 } from 'lucide-react';
 import { useIncidentStore } from '@/lib/store';
 import AlertDispatcherModal from './AlertDispatcherModal';
@@ -39,6 +40,7 @@ export default function Navigation() {
     { href: '/schedules', label: 'On-Call & Escalation', icon: Calendar },
     { href: '/rca', label: 'RCA & Post-Mortems', icon: FileText },
     { href: '/analytics', label: 'SLA Analytics', icon: BarChart3 },
+    { href: '/integrations', label: 'ChatOps & Webhooks', icon: MessageSquareCode },
   ];
 
   return (
