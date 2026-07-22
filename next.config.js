@@ -10,7 +10,7 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  ...(process.env.NODE_ENV === 'production' ? { output: 'export' } : {}),
+  output: 'export',
 }
 
 module.exports = nextConfig
