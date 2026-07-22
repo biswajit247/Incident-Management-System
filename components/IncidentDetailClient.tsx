@@ -17,6 +17,7 @@ import WarRoomChat from '@/components/WarRoomChat';
 import SLATimerBadge from '@/components/SLATimerBadge';
 import RcaEditor from '@/components/RcaEditor';
 import IncidentOccurrenceFormModal from '@/components/IncidentOccurrenceFormModal';
+import TelemetryChart from '@/components/TelemetryChart';
 import { useIncidentStore } from '@/lib/store';
 import { MOCK_RESPONDERS } from '@/lib/mockData';
 import { IncidentStatus } from '@/lib/types';
@@ -206,6 +207,9 @@ export default function IncidentDetailClient({ id }: IncidentDetailClientProps) 
         </div>
 
       </div>
+
+      {/* Live Telemetry Graphic */}
+      <TelemetryChart metrics={incident.affectedMetrics || {}} service={incident.service} />
 
       {/* Mode Navigation Tabs */}
       <div className="flex items-center space-x-2 border-b border-gray-800 pb-2 text-xs">
