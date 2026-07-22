@@ -413,6 +413,71 @@ export function useIncidentStore() {
     setShifts(prev => [...prev, shift]);
   };
 
+  // SLA Stress & Chaos Simulation
+  const simulateSlaAnomalies = (type: 'traffic' | 'breach' | 'reset') => {
+    if (type === 'reset') {
+      resetToDefault();
+      return;
+    }
+
+    const orgId = activeOrgId === 'ALL' ? 'org-protiviti-in' : activeOrgId;
+    const matchingShift = rawShifts.find(s => s.organizationId === orgId) || rawShifts[0];
+
+    if (type === 'traffic') {
+      const createdAt = new Date().toISOString();
+      const id = `PRO-CHAOS-${Math.floor(1000 + Math.random() * 9000)}`;
+      const { ttaDeadline, ttrDeadline } = calculateSLADeadlines(createdAt, 'P1');
+      const newInc: Incident = {
+        id,
+        organizationId: orgId,
+        title: 'CHAOS INJECTION: Simulated Production Database High Write Lock Saturation',
+        description: 'Chaos Engineering Test: Synthetic traffic surge. postgres_pg_stat_database_numbackends = 998. Write transactions locked.',
+        severity: 'P1',
+        status: 'triggered',
+        service: 'Platform & DB',
+        createdAt,
+        assignedTo: matchingShift.tier1,
+        ttaDeadline,
+        ttrDeadline,
+        ttaBreached: false,
+        ttrBreached: false,
+        source: 'prometheus',
+        tags: ['chaos-test', 'load-surge', 'active-lock'],
+        affectedMetrics: {
+          cpu: '99%',
+          latencyP99: '14,800 ms',
+          errorRate: '12.4%',
+        }
+      };
+
+      setIncidents(prev => [newInc, ...prev]);
+    } else if (type === 'breach') {
+      // Create an incident that was triggered 45 minutes ago to force TTA & TTR breaches
+      const createdAt = new Date(Date.now() - 45 * 60 * 1000).toISOString();
+      const id = `PRO-BREACH-${Math.floor(1000 + Math.random() * 9000)}`;
+      const { ttaDeadline, ttrDeadline } = calculateSLADeadlines(createdAt, 'P1');
+      const newInc: Incident = {
+        id,
+        organizationId: orgId,
+        title: 'SLA BREACH SIMULATION: Microservice API Route Gateway Timeout (504)',
+        description: 'SLA Stress Test: Simulated unacknowledged incident past 5-minute MTTA and 30-minute MTTR escalation limits.',
+        severity: 'P1',
+        status: 'triggered',
+        service: 'Platform & DB',
+        createdAt,
+        assignedTo: matchingShift.tier1,
+        ttaDeadline,
+        ttrDeadline,
+        ttaBreached: true,
+        ttrBreached: true,
+        source: 'cloudwatch',
+        tags: ['sla-breach', 'sla-test', 'timeout-escalation'],
+      };
+
+      setIncidents(prev => [newInc, ...prev]);
+    }
+  };
+
   return {
     isLoaded,
     currentUser,
@@ -441,6 +506,7 @@ export function useIncidentStore() {
     addTimelineNote,
     saveRcaReport,
     createOnCallShift,
+    simulateSlaAnomalies,
     resetToDefault,
   };
 }
