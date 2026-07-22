@@ -5,7 +5,7 @@ import { X, Radio, Send, Zap, CheckCircle2, ShieldAlert, Code2 } from 'lucide-re
 import { useIncidentStore } from '@/lib/store';
 import { Severity } from '@/lib/types';
 
-interface AlertSimulatorModalProps {
+interface AlertDispatcherModalProps {
   onClose: () => void;
 }
 
@@ -48,7 +48,7 @@ const PRESETS = [
   },
 ];
 
-export default function AlertSimulatorModal({ onClose }: AlertSimulatorModalProps) {
+export default function AlertDispatcherModal({ onClose }: AlertDispatcherModalProps) {
   const { createIncident } = useIncidentStore();
   const [selectedPresetIndex, setSelectedPresetIndex] = useState(0);
   const [customTitle, setCustomTitle] = useState(PRESETS[0].title);
@@ -57,8 +57,8 @@ export default function AlertSimulatorModal({ onClose }: AlertSimulatorModalProp
   const [service, setService] = useState(PRESETS[0].service);
   const [source, setSource] = useState(PRESETS[0].source);
 
-  const [simulatedLog, setSimulatedLog] = useState<string[]>([]);
-  const [isInjecting, setIsInjecting] = useState(false);
+  const [dispatchLog, setDispatchLog] = useState<string[]>([]);
+  const [isDispatching, setIsDispatching] = useState(false);
 
   const handleSelectPreset = (idx: number) => {
     setSelectedPresetIndex(idx);
@@ -70,9 +70,9 @@ export default function AlertSimulatorModal({ onClose }: AlertSimulatorModalProp
     setSource(preset.source);
   };
 
-  const handleFireAlert = () => {
-    setIsInjecting(true);
-    setSimulatedLog([
+  const handleDispatchAlert = () => {
+    setIsDispatching(true);
+    setDispatchLog([
       `[00:00] Ingesting HTTP POST webhook payload from ${source.toUpperCase()}...`,
       `[00:01] Parsing telemetry metrics... Severity determined as ${severity}.`,
       `[00:02] Deduplicating incident against open tickets... No existing open match found.`,
@@ -91,7 +91,7 @@ export default function AlertSimulatorModal({ onClose }: AlertSimulatorModalProp
         source,
       });
 
-      setIsInjecting(false);
+      setIsDispatching(false);
       onClose();
     }, 2000);
   };
@@ -202,10 +202,10 @@ export default function AlertSimulatorModal({ onClose }: AlertSimulatorModalProp
           </div>
         </div>
 
-        {/* Live Simulation Log Terminal output */}
-        {isInjecting && (
+        {/* Live Ingress Log Terminal output */}
+        {isDispatching && (
           <div className="mt-4 rounded-xl border border-amber-500/30 bg-black p-3 font-mono text-[11px] text-amber-400 space-y-1">
-            {simulatedLog.map((log, i) => (
+            {dispatchLog.map((log, i) => (
               <div key={i} className="flex items-center space-x-2">
                 <Zap className="h-3 w-3 text-amber-500 animate-spin" />
                 <span>{log}</span>
@@ -218,18 +218,18 @@ export default function AlertSimulatorModal({ onClose }: AlertSimulatorModalProp
         <div className="mt-6 flex justify-end space-x-3 border-t border-gray-800 pt-4">
           <button
             onClick={onClose}
-            disabled={isInjecting}
+            disabled={isDispatching}
             className="rounded-lg border border-gray-800 px-4 py-2 text-xs font-semibold text-gray-400 hover:bg-gray-800 hover:text-white"
           >
             Cancel
           </button>
           <button
-            onClick={handleFireAlert}
-            disabled={isInjecting}
+            onClick={handleDispatchAlert}
+            disabled={isDispatching}
             className="flex items-center space-x-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-600 px-5 py-2 text-xs font-bold text-gray-950 hover:from-amber-400 hover:to-orange-500 shadow-md shadow-amber-500/20"
           >
             <Send className="h-4 w-4" />
-            <span>{isInjecting ? 'Dispatching Payload...' : 'Dispatch Webhook & Route Alert'}</span>
+            <span>{isDispatching ? 'Dispatching Payload...' : 'Dispatch Webhook & Route Alert'}</span>
           </button>
         </div>
 

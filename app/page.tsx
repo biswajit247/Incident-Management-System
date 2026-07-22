@@ -19,7 +19,7 @@ import MetricsOverview from '@/components/MetricsOverview';
 import IncidentCard from '@/components/IncidentCard';
 import { useIncidentStore } from '@/lib/store';
 import { Severity } from '@/lib/types';
-import AlertSimulatorModal from '@/components/AlertSimulatorModal';
+import AlertDispatcherModal from '@/components/AlertDispatcherModal';
 
 export default function DashboardPage() {
   const { isLoaded, incidents, shifts, notifications } = useIncidentStore();
@@ -238,7 +238,7 @@ export default function DashboardPage() {
       </div>
 
       {isSimModalOpen && (
-        <AlertSimulatorModal onClose={() => setIsSimModalOpen(false)} />
+        <AlertDispatcherModal onClose={() => setIsSimModalOpen(false)} />
       )}
     </div>
   );

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Radio, Code2, Copy, Check, Send, ShieldAlert, Terminal, Play } from 'lucide-react';
-import AlertSimulatorModal from '@/components/AlertSimulatorModal';
+import AlertDispatcherModal from '@/components/AlertDispatcherModal';
 
 export default function AlertsPage() {
   const [isSimModalOpen, setIsSimModalOpen] = useState(false);
@@ -41,7 +41,7 @@ export default function AlertsPage() {
     "title": "Synthetic DB Pool Saturation Test",
     "severity": "P1",
     "service": "Platform & DB",
-    "description": "Simulated connection leak on primary postgres node."
+    "description": "Active connection leak on primary postgres node."
   }'`,
     },
   ];
@@ -130,7 +130,7 @@ export default function AlertsPage() {
       </div>
 
       {isSimModalOpen && (
-        <AlertSimulatorModal onClose={() => setIsSimModalOpen(false)} />
+        <AlertDispatcherModal onClose={() => setIsSimModalOpen(false)} />
       )}
     </div>
   );

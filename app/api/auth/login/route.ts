@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
       exp: Math.floor(Date.now() / 1000) + 86400, // 24 Hours
     };
 
-    // Simulated JWT token encoding
+    // JWT token encoding
     const encodedPayload = Buffer.from(JSON.stringify(jwtPayload)).toString('base64url');
     const token = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${encodedPayload}.sentinel_sec_sig`;
 

@@ -18,7 +18,7 @@ import {
   RefreshCw 
 } from 'lucide-react';
 import { useIncidentStore } from '@/lib/store';
-import AlertSimulatorModal from './AlertSimulatorModal';
+import AlertDispatcherModal from './AlertDispatcherModal';
 import TenantSettingsModal from './TenantSettingsModal';
 import AuthModal from './AuthModal';
 import { Building2, Settings, ShieldCheck } from 'lucide-react';
@@ -212,7 +212,7 @@ export default function Navigation() {
 
       {/* Alert Simulator Modal */}
       {isSimModalOpen && (
-        <AlertSimulatorModal onClose={() => setIsSimModalOpen(false)} />
+        <AlertDispatcherModal onClose={() => setIsSimModalOpen(false)} />
       )}
 
       {/* Tenant SLA & Branding Settings Modal */}

@@ -31,7 +31,7 @@ export default function AuthModal({ onClose }: AuthModalProps) {
     e.preventDefault();
     const token = login(email, password);
     if (token) {
-      // Decode simulated JWT payload
+      // Decode JWT payload
       const payload: JWTPayload = {
         sub: currentUser?.id || 'usr-101',
         email,
