@@ -11,7 +11,8 @@ import {
   ShieldAlert, 
   Download, 
   Check, 
-  Clock 
+  Clock,
+  Printer
 } from 'lucide-react';
 import { Incident, RcaReport, ActionItem } from '@/lib/types';
 import { useIncidentStore } from '@/lib/store';
@@ -168,6 +169,116 @@ ${actionItems.map(ai => `- [${ai.status === 'completed' ? 'x' : ' '}] **${ai.tit
     URL.revokeObjectURL(url);
   };
 
+  const handlePrintReport = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const actionItemsHtml = actionItems.map(ai => `
+      <tr style="border-bottom: 1px solid #e2e8f0;">
+        <td style="padding: 8px; font-weight: bold; color: #1e293b;">${ai.title}</td>
+        <td style="padding: 8px; color: #475569;">${ai.assignee}</td>
+        <td style="padding: 8px; text-transform: uppercase; color: #475569;">${ai.priority}</td>
+        <td style="padding: 8px; text-transform: uppercase; color: ${ai.status === 'completed' ? '#16a34a' : '#ea580c'}; font-weight: 600;">${ai.status.replace('_', ' ')}</td>
+      </tr>
+    `).join('');
+
+    const fiveWhysHtml = fiveWhys.map(w => `
+      <li style="margin-bottom: 8px; color: #334155; line-height: 1.5;">${w}</li>
+    `).join('');
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>RCA_${incident.id}</title>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; }
+            h1 { color: #0f172a; border-bottom: 2px solid #cbd5e1; padding-bottom: 12px; margin-top: 0; font-size: 24px; }
+            h2 { color: #1e293b; margin-top: 24px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; font-size: 18px; }
+            .meta-grid { display: grid; grid-template-cols: repeat(4, 1fr); gap: 16px; margin: 20px 0; }
+            .meta-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; rounded-corners: 6px; text-align: center; border-radius: 8px; }
+            .meta-label { font-size: 10px; font-weight: bold; color: #64748b; text-transform: uppercase; display: block; }
+            .meta-value { font-size: 14px; font-weight: bold; color: #334155; margin-top: 4px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+            th { text-align: left; background: #f1f5f9; padding: 10px; font-size: 12px; font-weight: bold; color: #475569; }
+            ul { padding-left: 20px; }
+            .brand { float: right; font-weight: 800; color: #0891b2; letter-spacing: 0.05em; font-size: 14px; }
+          </style>
+        </head>
+        <body>
+          <div class="brand">PROTIVITI SENTINEL</div>
+          <h1>Root Cause Analysis (RCA) Report</h1>
+          
+          <div style="margin-bottom: 20px; font-size: 12px; color: #64748b;">
+            <strong>Incident ID:</strong> ${incident.id} &bull; 
+            <strong>Severity:</strong> ${incident.severity} &bull; 
+            <strong>Author:</strong> ${incident.assignedTo.name} &bull; 
+            <strong>Date Generated:</strong> ${new Date().toLocaleDateString()}
+          </div>
+
+          <h2>1. Executive Summary</h2>
+          <p style="color: #334155; white-space: pre-wrap;">${summary}</p>
+
+          <h2>2. Business & Service Impact</h2>
+          <div class="meta-grid">
+            <div class="meta-card">
+              <span class="meta-label">Downtime Duration</span>
+              <span class="meta-value">${durationMinutes} minutes</span>
+            </div>
+            <div class="meta-card">
+              <span class="meta-label">Users Impacted</span>
+              <span class="meta-value">${usersAffected}</span>
+            </div>
+            <div class="meta-card">
+              <span class="meta-label">Affected Services</span>
+              <span class="meta-value">${affectedServices}</span>
+            </div>
+            <div class="meta-card">
+              <span class="meta-label">Revenue Impact</span>
+              <span class="meta-value">${revenueImpact}</span>
+            </div>
+          </div>
+
+          <h2>3. 5 Whys Analysis</h2>
+          <ol style="padding-left: 20px;">
+            ${fiveWhysHtml}
+          </ol>
+
+          <h2>4. Root Cause Statement</h2>
+          <p style="color: #334155; font-style: italic; background: #f8fafc; border-left: 4px solid #0891b2; padding: 12px; border-radius: 0 8px 8px 0;">
+            ${rootCause}
+          </p>
+
+          <h2>5. Detection & Mitigation</h2>
+          <p style="margin-bottom: 8px;"><strong>Detection Mechanism:</strong> ${detectionDetails}</p>
+          <p><strong>Mitigation Steps:</strong> ${mitigationSteps}</p>
+
+          <h2>6. Preventative Action Items</h2>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 50%;">Preventative Action Item</th>
+                <th>Assignee</th>
+                <th>Priority</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${actionItemsHtml}
+            </tbody>
+          </table>
+
+          <script>
+            window.onload = function() {
+              window.print();
+              window.close();
+            }
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
   return (
     <div className="space-y-6">
       
@@ -198,6 +309,13 @@ ${actionItems.map(ai => `- [${ai.status === 'completed' ? 'x' : ' '}] **${ai.tit
           >
             <Download className="h-4 w-4" />
             <span>Export Markdown</span>
+          </button>
+          <button
+            onClick={handlePrintReport}
+            className="flex items-center space-x-1.5 rounded-xl border border-cyan-500/30 bg-cyan-950/20 px-4 py-2 text-xs font-semibold text-cyan-300 hover:bg-cyan-500/20"
+          >
+            <Printer className="h-4 w-4" />
+            <span>PDF / Print Report</span>
           </button>
           <button
             onClick={handleSave}
