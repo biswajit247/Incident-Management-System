@@ -150,8 +150,11 @@ export default function AuthModal({ onClose }: AuthModalProps) {
 
               {/* Dynamic Domain Tenant Resolution Banner */}
               {detectedOrg ? (
-                <div 
-                  className="flex items-center justify-between rounded-xl p-2.5 border text-xs"
+                <button
+                  type="button"
+                  onClick={handleLoginSubmit}
+                  title="Click to instantly authenticate and switch to this organization"
+                  className="w-full flex items-center justify-between rounded-xl p-2.5 border text-xs text-left cursor-pointer hover:brightness-125 transition-all focus:outline-none"
                   style={{ 
                     borderColor: `${detectedOrg.badgeColor}50`, 
                     backgroundColor: `${detectedOrg.badgeColor}15` 
@@ -164,10 +167,10 @@ export default function AuthModal({ onClose }: AuthModalProps) {
                       <p className="text-[10px] text-gray-300">Subdomain: {detectedOrg.subdomain} (Prefix: {detectedOrg.prefix})</p>
                     </div>
                   </div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-black/40 text-cyan-300 border border-cyan-500/30">
-                    MATCHED
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-black/40 text-cyan-300 border border-cyan-500/30 animate-pulse">
+                    CLICK TO LOGIN
                   </span>
-                </div>
+                </button>
               ) : (
                 <div className="rounded-xl border border-gray-800 bg-gray-900/40 p-2.5 text-xs text-gray-400">
                   Type a corporate domain (e.g. <span className="text-cyan-400 font-mono">@protiviti.com</span>) to auto-resolve company tenant.
