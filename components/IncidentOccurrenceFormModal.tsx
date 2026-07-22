@@ -203,7 +203,7 @@ export default function IncidentOccurrenceFormModal({ incident, onClose }: Incid
                   <td className="border border-gray-400 bg-gray-100 font-bold p-1.5">Site</td>
                   <td className="border border-gray-400 p-1.5 font-bold">kolkata</td>
                   <td className="border border-gray-400 bg-gray-100 font-bold p-1.5">Security/FM Lead</td>
-                  <td className="border border-gray-400 p-1.5">Arijit Naskar</td>
+                  <td className="border border-gray-400 p-1.5">Biswajit Naskar</td>
                   <td className="border border-gray-400 bg-gray-100 font-bold p-1.5">Mobile</td>
                   <td className="border border-gray-400 p-1.5 font-mono text-[9px]">87775 48171, 89811 44755 (WA)</td>
                 </tr>
@@ -315,7 +315,7 @@ export default function IncidentOccurrenceFormModal({ incident, onClose }: Incid
             <div className="pt-4 border-t border-gray-400 flex items-center justify-between text-[10px] font-bold">
               <div>
                 <span>SECURITY SHIFT IC/FE SIGNATURE:</span>
-                <p className="font-mono text-cyan-900 mt-1">Shuvam Boral, Puja Dutta</p>
+                <p className="font-mono text-cyan-900 mt-1">Biswajit Naskar, Aniruddha Kar</p>
               </div>
               <div className="text-right">
                 <span>DATE: 30/12/2025</span>

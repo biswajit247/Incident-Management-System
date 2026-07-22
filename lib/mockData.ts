@@ -50,7 +50,7 @@ export const MOCK_ORGANIZATIONS: Organization[] = [
 export const MOCK_USERS: User[] = [
   {
     id: 'usr-101',
-    name: 'Shuvam Boral',
+    name: 'Biswajit Naskar',
     email: 'shuvam@protiviti.com',
     organizationId: 'org-protiviti-in',
     role: 'SecurityLead',
@@ -68,7 +68,7 @@ export const MOCK_USERS: User[] = [
   },
   {
     id: 'usr-103',
-    name: 'Puja Dutta',
+    name: 'Aniruddha Kar',
     email: 'puja@protiviti.com',
     organizationId: 'org-protiviti-in',
     role: 'Reporter',
@@ -77,7 +77,7 @@ export const MOCK_USERS: User[] = [
   },
   {
     id: 'usr-201',
-    name: 'Alex Rivera',
+    name: 'Aniruddha Kar',
     email: 'alex@acme.com',
     organizationId: 'org-acme-fin',
     role: 'SecurityLead',
@@ -86,7 +86,7 @@ export const MOCK_USERS: User[] = [
   },
   {
     id: 'usr-301',
-    name: 'Sarah Jenkins',
+    name: 'Biswajit Naskar',
     email: 'sarah@nexus.com',
     organizationId: 'org-nexus-cloud',
     role: 'OrgAdmin',
@@ -98,7 +98,7 @@ export const MOCK_USERS: User[] = [
 export const MOCK_RESPONDERS: Responder[] = [
   {
     id: 'resp-1',
-    name: 'Alex Rivera',
+    name: 'Aniruddha Kar',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150',
     role: 'Staff SRE Lead',
     email: 'alex.rivera@company.internal',
@@ -107,7 +107,7 @@ export const MOCK_RESPONDERS: Responder[] = [
   },
   {
     id: 'resp-2',
-    name: 'Elena Rostova',
+    name: 'Biswajit Naskar',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150',
     role: 'Principal Infrastructure Eng',
     email: 'elena.r@company.internal',
@@ -116,7 +116,7 @@ export const MOCK_RESPONDERS: Responder[] = [
   },
   {
     id: 'resp-3',
-    name: 'David Chen',
+    name: 'Aniruddha Kar',
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150',
     role: 'Senior Backend Lead',
     email: 'david.chen@company.internal',
@@ -125,7 +125,7 @@ export const MOCK_RESPONDERS: Responder[] = [
   },
   {
     id: 'resp-4',
-    name: 'Sarah Jenkins',
+    name: 'Biswajit Naskar',
     avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150',
     role: 'SecOps Architect',
     email: 'sarah.j@company.internal',
@@ -134,7 +134,7 @@ export const MOCK_RESPONDERS: Responder[] = [
   },
   {
     id: 'resp-5',
-    name: 'Marcus Vance',
+    name: 'Aniruddha Kar',
     avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&q=80&w=150',
     role: 'DevOps Specialist',
     email: 'marcus.v@company.internal',
@@ -163,7 +163,7 @@ export const INITIAL_INCIDENTS: Incident[] = [
     service: 'Payments Engine',
     createdAt: minutesAgo(12),
     acknowledgedAt: minutesAgo(10),
-    assignedTo: MOCK_RESPONDERS[2], // David Chen
+    assignedTo: MOCK_RESPONDERS[2], // Aniruddha Kar
     ttaDeadline: p1Sla.ttaDeadline,
     ttrDeadline: p1Sla.ttrDeadline,
     ttaBreached: false,
@@ -187,7 +187,7 @@ export const INITIAL_INCIDENTS: Incident[] = [
     status: 'triggered',
     service: 'Platform & DB',
     createdAt: minutesAgo(6), // 6 mins ago -> TTA 5 mins breached!
-    assignedTo: MOCK_RESPONDERS[1], // Elena Rostova
+    assignedTo: MOCK_RESPONDERS[1], // Biswajit Naskar
     ttaDeadline: p1_2Sla.ttaDeadline,
     ttrDeadline: p1_2Sla.ttrDeadline,
     ttaBreached: true,
@@ -213,7 +213,7 @@ export const INITIAL_INCIDENTS: Incident[] = [
     createdAt: minutesAgo(300),
     acknowledgedAt: minutesAgo(290),
     resolvedAt: minutesAgo(60),
-    assignedTo: MOCK_RESPONDERS[1], // Elena Rostova
+    assignedTo: MOCK_RESPONDERS[1], // Biswajit Naskar
     ttaDeadline: p2Sla.ttaDeadline,
     ttrDeadline: p2Sla.ttrDeadline,
     ttaBreached: false,
@@ -232,7 +232,7 @@ export const INITIAL_INCIDENTS: Incident[] = [
     service: 'Security & Auth',
     createdAt: minutesAgo(35),
     acknowledgedAt: minutesAgo(28),
-    assignedTo: MOCK_RESPONDERS[3], // Sarah Jenkins
+    assignedTo: MOCK_RESPONDERS[3], // Biswajit Naskar
     ttaDeadline: p2Sla.ttaDeadline,
     ttrDeadline: p2Sla.ttrDeadline,
     ttaBreached: false,
@@ -256,7 +256,7 @@ export const INITIAL_INCIDENTS: Incident[] = [
     service: 'SRE Core',
     createdAt: minutesAgo(90),
     acknowledgedAt: minutesAgo(75),
-    assignedTo: MOCK_RESPONDERS[0], // Alex Rivera
+    assignedTo: MOCK_RESPONDERS[0], // Aniruddha Kar
     ttaDeadline: p3Sla.ttaDeadline,
     ttrDeadline: p3Sla.ttrDeadline,
     ttaBreached: false,
@@ -275,7 +275,7 @@ export const INITIAL_INCIDENTS: Incident[] = [
     createdAt: minutesAgo(240),
     acknowledgedAt: minutesAgo(230),
     resolvedAt: minutesAgo(120),
-    assignedTo: MOCK_RESPONDERS[4], // Marcus Vance
+    assignedTo: MOCK_RESPONDERS[4], // Aniruddha Kar
     ttaDeadline: p4Sla.ttaDeadline,
     ttrDeadline: p4Sla.ttrDeadline,
     ttaBreached: false,
@@ -302,22 +302,22 @@ export const INITIAL_TIMELINE_EVENTS: Record<string, TimelineEvent[]> = {
       timestamp: minutesAgo(11),
       type: 'escalation',
       author: 'Automated Routing Engine',
-      content: 'Routed ticket to Tier 1 On-Call: David Chen (Payments Engine)',
+      content: 'Routed ticket to Tier 1 On-Call: Aniruddha Kar (Payments Engine)',
     },
     {
       id: 'te-3',
       incidentId: 'INC-9042',
       timestamp: minutesAgo(10),
       type: 'responder_assigned',
-      author: 'David Chen',
-      content: 'Incident acknowledged by David Chen. SLA TTA satisfied in 2 minutes.',
+      author: 'Aniruddha Kar',
+      content: 'Incident acknowledged by Aniruddha Kar. SLA TTA satisfied in 2 minutes.',
     },
     {
       id: 'te-4',
       incidentId: 'INC-9042',
       timestamp: minutesAgo(7),
       type: 'status_change',
-      author: 'David Chen',
+      author: 'Aniruddha Kar',
       content: 'Changed status to Investigating. Auto-provisioned War Room & Video Bridge.',
     },
     {
@@ -325,7 +325,7 @@ export const INITIAL_TIMELINE_EVENTS: Record<string, TimelineEvent[]> = {
       incidentId: 'INC-9042',
       timestamp: minutesAgo(3),
       type: 'note_added',
-      author: 'Alex Rivera',
+      author: 'Aniruddha Kar',
       content: 'Joined War Room. Inspected Stripe SDK logs; pool exhaustion confirmed. Increasing worker capacity pool by 2x.',
     },
   ],
@@ -344,7 +344,7 @@ export const INITIAL_TIMELINE_EVENTS: Record<string, TimelineEvent[]> = {
       timestamp: minutesAgo(5),
       type: 'escalation',
       author: 'Automated Escalation',
-      content: 'TTA Breach Warning! Ticket unacknowledged after 5 minutes. Paged Tier 2 Lead: Alex Rivera via SMS/Voice.',
+      content: 'TTA Breach Warning! Ticket unacknowledged after 5 minutes. Paged Tier 2 Lead: Aniruddha Kar via SMS/Voice.',
     },
   ],
 };
@@ -362,21 +362,21 @@ export const INITIAL_WAR_ROOM_MESSAGES: Record<string, WarRoomMessage[]> = {
     {
       id: 'wm-2',
       incidentId: 'INC-9042',
-      sender: { name: 'David Chen', avatar: MOCK_RESPONDERS[2].avatar, role: 'Senior Backend Lead' },
+      sender: { name: 'Aniruddha Kar', avatar: MOCK_RESPONDERS[2].avatar, role: 'Senior Backend Lead' },
       message: 'I am taking point on this. Seeing 504 errors on Stripe payment intents. Connection pool maxed at 200 handles.',
       timestamp: minutesAgo(10),
     },
     {
       id: 'wm-3',
       incidentId: 'INC-9042',
-      sender: { name: 'Elena Rostova', avatar: MOCK_RESPONDERS[1].avatar, role: 'Platform & DB' },
+      sender: { name: 'Biswajit Naskar', avatar: MOCK_RESPONDERS[1].avatar, role: 'Platform & DB' },
       message: 'Checked the database connections from the payment pods. DB load looks normal, issue is outbound network socket timeout to Stripe API.',
       timestamp: minutesAgo(6),
     },
     {
       id: 'wm-4',
       incidentId: 'INC-9042',
-      sender: { name: 'Alex Rivera', avatar: MOCK_RESPONDERS[0].avatar, role: 'Staff SRE Lead' },
+      sender: { name: 'Aniruddha Kar', avatar: MOCK_RESPONDERS[0].avatar, role: 'Staff SRE Lead' },
       message: 'Scaling payment service pods from 10 to 25 and enabling connection pooling keep-alive to flush stuck TCP sockets.',
       timestamp: minutesAgo(2),
     },
@@ -389,9 +389,9 @@ export const INITIAL_ON_CALL_SHIFTS: OnCallShift[] = [
     organizationId: 'org-protiviti-in',
     teamName: 'Payments & Checkout',
     service: 'Payments Engine',
-    tier1: MOCK_RESPONDERS[2], // David Chen
-    tier2: MOCK_RESPONDERS[0], // Alex Rivera
-    executiveEscalation: MOCK_RESPONDERS[1], // Elena Rostova
+    tier1: MOCK_RESPONDERS[2], // Aniruddha Kar
+    tier2: MOCK_RESPONDERS[0], // Aniruddha Kar
+    executiveEscalation: MOCK_RESPONDERS[1], // Biswajit Naskar
     escalationTimeoutMins: 5,
     shiftStart: '08:00 AM UTC',
     shiftEnd: '08:00 PM UTC',
@@ -401,8 +401,8 @@ export const INITIAL_ON_CALL_SHIFTS: OnCallShift[] = [
     organizationId: 'org-protiviti-in',
     teamName: 'Database & Infrastructure',
     service: 'Platform & DB',
-    tier1: MOCK_RESPONDERS[1], // Elena Rostova
-    tier2: MOCK_RESPONDERS[4], // Marcus Vance
+    tier1: MOCK_RESPONDERS[1], // Biswajit Naskar
+    tier2: MOCK_RESPONDERS[4], // Aniruddha Kar
     executiveEscalation: MOCK_RESPONDERS[0],
     escalationTimeoutMins: 5,
     shiftStart: '08:00 AM UTC',
@@ -413,7 +413,7 @@ export const INITIAL_ON_CALL_SHIFTS: OnCallShift[] = [
     organizationId: 'org-acme-fin',
     teamName: 'Identity & Access',
     service: 'Security & Auth',
-    tier1: MOCK_RESPONDERS[3], // Sarah Jenkins
+    tier1: MOCK_RESPONDERS[3], // Biswajit Naskar
     tier2: MOCK_RESPONDERS[2],
     executiveEscalation: MOCK_RESPONDERS[0],
     escalationTimeoutMins: 15,
@@ -429,7 +429,7 @@ export const INITIAL_RCA_REPORTS: RcaReport[] = [
     organizationId: 'org-protiviti-in',
     title: 'Incident Occurrence Report: Kolkata 10th Floor Server Room AC Failure',
     severity: 'P2',
-    author: 'Arijit Naskar',
+    author: 'Biswajit Naskar',
     createdAt: minutesAgo(290),
     updatedAt: minutesAgo(60),
     summary: 'The AC unit in the 10th Floor Kolkata Server Room tripped, leading to a sudden temperature surge. HVAC Technician was dispatched on 30th Dec 2025, resolved compressor relay issue, and unit is under continuous thermal observation.',
@@ -453,7 +453,7 @@ export const INITIAL_RCA_REPORTS: RcaReport[] = [
       {
         id: 'ai-101',
         title: 'Install secondary redundant backup AC unit in 10th Floor Server Room',
-        assignee: 'Arijit Naskar',
+        assignee: 'Biswajit Naskar',
         status: 'in_progress',
         priority: 'high',
       },
@@ -473,7 +473,7 @@ export const INITIAL_RCA_REPORTS: RcaReport[] = [
     organizationId: 'org-protiviti-in',
     title: 'Post-Mortem: CDN Asset 404 Cache Misconfiguration',
     severity: 'P4',
-    author: 'Marcus Vance',
+    author: 'Aniruddha Kar',
     createdAt: minutesAgo(110),
     updatedAt: minutesAgo(90),
     summary: 'A deployment script override caused Cloudflare edge cache rules to bypass origin static assets for staging domains.',
@@ -497,14 +497,14 @@ export const INITIAL_RCA_REPORTS: RcaReport[] = [
       {
         id: 'ai-1',
         title: 'Add automated CDN edge configuration validator to Terraform pipeline',
-        assignee: 'Marcus Vance',
+        assignee: 'Aniruddha Kar',
         status: 'in_progress',
         priority: 'high',
       },
       {
         id: 'ai-2',
         title: 'Update staging deployment checklist to require smoke tests on static asset URLs',
-        assignee: 'Elena Rostova',
+        assignee: 'Biswajit Naskar',
         status: 'completed',
         priority: 'medium',
       },

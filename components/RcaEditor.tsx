@@ -65,7 +65,7 @@ export default function RcaEditor({ incident, existingRca }: RcaEditorProps) {
       {
         id: 'ai-2',
         title: 'Implement production traffic playback load testing in CI staging suite',
-        assignee: 'Elena Rostova',
+        assignee: 'Biswajit Naskar',
         status: 'todo',
         priority: 'high',
       },
