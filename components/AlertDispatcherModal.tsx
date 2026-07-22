@@ -88,8 +88,8 @@ export default function AlertDispatcherModal({ onClose }: AlertDispatcherModalPr
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
-      <div className="relative w-full max-w-2xl rounded-2xl border border-gray-800 bg-gray-950 p-6 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/80 p-4 backdrop-blur-sm overflow-y-auto">
+      <div className="relative w-full max-w-2xl rounded-2xl border border-gray-800 bg-gray-950 p-6 shadow-2xl my-8">
         
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-800 pb-4">

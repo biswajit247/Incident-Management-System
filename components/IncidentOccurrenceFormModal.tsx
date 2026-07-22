@@ -17,7 +17,7 @@ export default function IncidentOccurrenceFormModal({ incident, onClose }: Incid
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/80 p-4 backdrop-blur-md overflow-y-auto">
       
       {/* Modal Container */}
       <div className="relative w-full max-w-4xl rounded-2xl border border-gray-800 bg-gray-950 p-6 shadow-2xl my-8">
