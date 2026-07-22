@@ -25,7 +25,7 @@ export interface NotificationLog {
   status: 'DELIVERED' | 'SENT' | 'FAILED';
 }
 
-const STORAGE_KEY = 'incident_system_state_v5';
+const STORAGE_KEY = 'incident_system_state_v6';
 
 export function useIncidentStore() {
   const [organizations, setOrganizations] = useState<Organization[]>(MOCK_ORGANIZATIONS);
@@ -33,6 +33,7 @@ export function useIncidentStore() {
 
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [jwtToken, setJwtToken] = useState<string | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
 
   const [rawIncidents, setIncidents] = useState<Incident[]>([]);
   const [timelineEvents, setTimelineEvents] = useState<Record<string, TimelineEvent[]>>({});
@@ -54,12 +55,14 @@ export function useIncidentStore() {
         setShifts(parsed.shifts || INITIAL_ON_CALL_SHIFTS);
         setRcaReports(parsed.rcaReports || INITIAL_RCA_REPORTS);
         setNotifications(parsed.notifications || []);
+        setUsers(parsed.users || MOCK_USERS);
       } else {
         setIncidents(INITIAL_INCIDENTS);
         setTimelineEvents(INITIAL_TIMELINE_EVENTS);
         setWarRoomMessages(INITIAL_WAR_ROOM_MESSAGES);
         setShifts(INITIAL_ON_CALL_SHIFTS);
         setRcaReports(INITIAL_RCA_REPORTS);
+        setUsers(MOCK_USERS);
       }
     } catch (e) {
       console.error('Failed to load storage state:', e);
@@ -68,6 +71,7 @@ export function useIncidentStore() {
       setWarRoomMessages(INITIAL_WAR_ROOM_MESSAGES);
       setShifts(INITIAL_ON_CALL_SHIFTS);
       setRcaReports(INITIAL_RCA_REPORTS);
+      setUsers(MOCK_USERS);
     }
     setIsLoaded(true);
   }, []);
@@ -82,12 +86,13 @@ export function useIncidentStore() {
         warRoomMessages,
         shifts: rawShifts,
         rcaReports: rawRcaReports,
-        notifications
+        notifications,
+        users
       }));
     } catch (e) {
       console.error('Failed to save storage state:', e);
     }
-  }, [rawIncidents, timelineEvents, warRoomMessages, rawShifts, rawRcaReports, notifications, isLoaded]);
+  }, [rawIncidents, timelineEvents, warRoomMessages, rawShifts, rawRcaReports, notifications, users, isLoaded]);
 
   // Periodic SLA Breach Checker
   useEffect(() => {
@@ -384,7 +389,7 @@ export function useIncidentStore() {
   };
   // Login Handler
   const login = (email: string, pass: string) => {
-    const user = MOCK_USERS.find(u => u.email.toLowerCase() === email.toLowerCase());
+    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
     if (user) {
       setCurrentUser(user);
       setActiveOrgId(user.organizationId);
@@ -478,6 +483,22 @@ export function useIncidentStore() {
     }
   };
 
+  const addUser = (newUser: User) => {
+    setUsers(prev => {
+      const idx = prev.findIndex(u => u.email.toLowerCase() === newUser.email.toLowerCase());
+      if (idx >= 0) {
+        const copy = [...prev];
+        copy[idx] = newUser;
+        return copy;
+      }
+      return [...prev, newUser];
+    });
+  };
+
+  const removeUser = (userId: string) => {
+    setUsers(prev => prev.filter(u => u.id !== userId));
+  };
+
   return {
     isLoaded,
     currentUser,
@@ -498,6 +519,7 @@ export function useIncidentStore() {
     rcaReports,
     allRcaReports: rawRcaReports,
     notifications,
+    users,
     createIncident,
     acknowledgeIncident,
     updateIncidentStatus,
@@ -508,5 +530,7 @@ export function useIncidentStore() {
     createOnCallShift,
     simulateSlaAnomalies,
     resetToDefault,
+    addUser,
+    removeUser,
   };
 }

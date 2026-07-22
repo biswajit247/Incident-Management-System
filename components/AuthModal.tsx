@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { X, Lock, Key, ShieldCheck, Mail, ArrowRight, Building2, UserCheck, Code, CheckCircle2 } from 'lucide-react';
 import { useIncidentStore } from '@/lib/store';
-import { MOCK_USERS } from '@/lib/mockData';
 import { JWTPayload, User } from '@/lib/types';
 
 interface AuthModalProps {
@@ -11,7 +10,7 @@ interface AuthModalProps {
 }
 
 export default function AuthModal({ onClose }: AuthModalProps) {
-  const { currentUser, login, organizations } = useIncidentStore();
+  const { currentUser, login, organizations, users } = useIncidentStore();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -34,7 +33,7 @@ export default function AuthModal({ onClose }: AuthModalProps) {
         sub: currentUser?.id || 'usr-101',
         email,
         orgId: detectedOrg?.id || 'org-protiviti-in',
-        role: (MOCK_USERS.find(u => u.email === email)?.role || 'SecurityLead') as any,
+        role: (users.find(u => u.email.toLowerCase() === email.toLowerCase())?.role || 'SecurityLead') as any,
         exp: Math.floor(Date.now() / 1000) + 86400,
       };
       setJwtPayload(payload);
@@ -107,30 +106,20 @@ export default function AuthModal({ onClose }: AuthModalProps) {
                 Enterprise Credentials Directory
               </span>
               
-              <div className="grid grid-cols-1 gap-2.5 pt-1.5 text-gray-300">
-                <div className="flex items-center justify-between border-b border-gray-900 pb-1.5">
-                  <div>
-                    <p className="font-bold text-white">Biswajit Naskar (SecurityLead)</p>
-                    <p className="font-mono text-[10px] text-gray-400">biswajit@protiviti.com</p>
+              <div className="grid grid-cols-1 gap-2 pt-1.5 text-gray-300 max-h-48 overflow-y-auto pr-1">
+                {users.map(u => (
+                  <div 
+                    key={u.id} 
+                    onClick={() => handleQuickSelectUser(u)}
+                    className="flex items-center justify-between border-b border-gray-900 pb-1.5 hover:bg-gray-900/60 p-1.5 rounded transition-all cursor-pointer"
+                  >
+                    <div>
+                      <p className="font-bold text-white text-[11px]">{u.name} ({u.role})</p>
+                      <p className="font-mono text-[9px] text-gray-400">{u.email}</p>
+                    </div>
+                    <span className="font-mono text-[9px] text-cyan-400">pwd: password123</span>
                   </div>
-                  <span className="font-mono text-[10px] text-cyan-400">pwd: password123</span>
-                </div>
-
-                <div className="flex items-center justify-between border-b border-gray-900 pb-1.5">
-                  <div>
-                    <p className="font-bold text-white">Rahul Lal (OrgAdmin)</p>
-                    <p className="font-mono text-[10px] text-gray-400">rahul.admin@protiviti.com</p>
-                  </div>
-                  <span className="font-mono text-[10px] text-cyan-400">pwd: password123</span>
-                </div>
-
-                <div className="flex items-center justify-between pb-0.5">
-                  <div>
-                    <p className="font-bold text-white">Aniruddha Kar (Reporter)</p>
-                    <p className="font-mono text-[10px] text-gray-400">aniruddha@protiviti.com</p>
-                  </div>
-                  <span className="font-mono text-[10px] text-cyan-400">pwd: password123</span>
-                </div>
+                ))}
               </div>
             </div>
 

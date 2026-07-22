@@ -22,7 +22,7 @@ import { useIncidentStore } from '@/lib/store';
 import AlertDispatcherModal from './AlertDispatcherModal';
 import TenantSettingsModal from './TenantSettingsModal';
 import AuthModal from './AuthModal';
-import { Building2, Settings, ShieldCheck } from 'lucide-react';
+import { Building2, Settings, ShieldCheck, UserCheck } from 'lucide-react';
 
 export default function Navigation() {
   const pathname = usePathname();
@@ -41,6 +41,7 @@ export default function Navigation() {
     { href: '/rca', label: 'RCA & Post-Mortems', icon: FileText },
     { href: '/analytics', label: 'SLA Analytics', icon: BarChart3 },
     { href: '/integrations', label: 'ChatOps & Webhooks', icon: MessageSquareCode },
+    { href: '/access', label: 'Access Control', icon: UserCheck },
   ];
 
   return (
