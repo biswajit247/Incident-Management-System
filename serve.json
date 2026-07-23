@@ -1,0 +1,10 @@
+{
+  "public": "out",
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/incidents/:id",
+      "destination": "/incidents/PRO-9041.html"
+    }
+  ]
+}
