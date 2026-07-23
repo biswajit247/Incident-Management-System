@@ -154,6 +154,23 @@ export const INITIAL_INCIDENTS: Incident[] = [
     tags: ['kolkata', 'server-room', 'ac-failure', 'facilities', 'thermal'],
   },
   {
+    id: 'PRO-9045',
+    organizationId: 'org-protiviti-in',
+    title: 'BENGALURU IOF: 4th Floor UPS System Beeping & Battery Fault',
+    description: 'BENGALURU IOF: 4th Floor Server Room UPS-02 beeping with battery replacement alarm. [Reported by Rahul Lal]',
+    severity: 'P2',
+    status: 'triggered',
+    service: 'Platform & DB',
+    createdAt: minutesAgo(2),
+    assignedTo: MOCK_RESPONDERS[1], // Biswajit Naskar
+    ttaDeadline: p2Sla.ttaDeadline,
+    ttrDeadline: p2Sla.ttrDeadline,
+    ttaBreached: false,
+    ttrBreached: false,
+    source: 'user',
+    tags: ['iof-compliance', 'bengaluru', 'facilities'],
+  },
+  {
     id: 'ACME-9039',
     organizationId: 'org-acme-fin',
     title: 'Redis Cluster Memory Eviction Spike in OAuth Token Store',

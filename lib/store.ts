@@ -386,6 +386,9 @@ export function useIncidentStore() {
     setShifts(INITIAL_ON_CALL_SHIFTS);
     setRcaReports(INITIAL_RCA_REPORTS);
     setNotifications([]);
+    setUsers(MOCK_USERS);
+    setCurrentUser(null);
+    setJwtToken(null);
   };
   // Login Handler
   const login = (email: string, pass: string) => {

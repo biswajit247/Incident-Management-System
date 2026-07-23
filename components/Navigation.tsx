@@ -123,6 +123,21 @@ export default function Navigation() {
               <span>+ Dispatch Alert</span>
             </button>
 
+            {/* Reset System Button */}
+            <button
+              onClick={() => {
+                if (window.confirm('Reset all custom created incidents, users, and compliance documents to default state?')) {
+                  resetToDefault();
+                  window.location.reload();
+                }
+              }}
+              className="flex items-center space-x-1.5 rounded-xl border border-red-900/30 bg-red-950/30 px-3.5 py-2 text-xs font-bold text-red-400 hover:bg-red-900/25 transition-all shadow-sm"
+              title="Reset Sentinel to baseline mock data"
+            >
+              <RefreshCw className="h-4 w-4 animate-spin-slow" />
+              <span className="hidden md:inline">Reset System</span>
+            </button>
+
             {/* Authenticated User Profile Badge */}
             {currentUser ? (
               <button
