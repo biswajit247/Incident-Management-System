@@ -100,29 +100,6 @@ export default function AuthModal({ onClose }: AuthModalProps) {
         {activeTab === 'login' ? (
           <div className="space-y-4">
             
-            {/* Login Credentials Guide */}
-            <div className="rounded-xl border border-gray-800 bg-gray-950 p-4.5 space-y-2 text-xs">
-              <span className="block font-bold text-white uppercase tracking-wider text-[11px] text-cyan-400">
-                Enterprise Credentials Directory
-              </span>
-              
-              <div className="grid grid-cols-1 gap-2 pt-1.5 text-gray-300 max-h-48 overflow-y-auto pr-1">
-                {users.map(u => (
-                  <div 
-                    key={u.id} 
-                    onClick={() => handleQuickSelectUser(u)}
-                    className="flex items-center justify-between border-b border-gray-900 pb-1.5 hover:bg-gray-900/60 p-1.5 rounded transition-all cursor-pointer"
-                  >
-                    <div>
-                      <p className="font-bold text-white text-[11px]">{u.name} ({u.role})</p>
-                      <p className="font-mono text-[9px] text-gray-400">{u.email}</p>
-                    </div>
-                    <span className="font-mono text-[9px] text-cyan-400">pwd: password123</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
             {/* Login Form */}
             <form onSubmit={handleLoginSubmit} className="space-y-3 pt-2">
               <div>

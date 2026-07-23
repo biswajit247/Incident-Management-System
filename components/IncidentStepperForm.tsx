@@ -70,7 +70,7 @@ export default function IncidentStepperForm() {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   // Step 1 State
-  const [incidentNumber] = useState(`PRO - 0${Math.floor(10 + Math.random() * 90)} / KOL`);
+  const [randNum] = useState(() => Math.floor(10 + Math.random() * 90));
   const [reportedDate, setReportedDate] = useState(new Date().toISOString().slice(0, 16));
   const [site, setSite] = useState('kolkata');
   const [securityLead, setSecurityLead] = useState('');
@@ -78,6 +78,15 @@ export default function IncidentStepperForm() {
   const [exactLocation, setExactLocation] = useState('');
   const [severityLevel, setSeverityLevel] = useState<'Level 1 (Low)' | 'Level 2 (Medium)' | 'Level 3 (High)'>('Level 1 (Low)');
   const [description, setDescription] = useState('');
+
+  const getSiteCode = (s: string) => {
+    if (s === 'kolkata') return 'KOL';
+    if (s === 'mumbai') return 'BOM';
+    if (s === 'bengaluru') return 'BLR';
+    if (s === 'gurugram') return 'DEL';
+    return s.toUpperCase().slice(0, 3);
+  };
+  const incidentNumber = `PRO - 0${randNum} / ${getSiteCode(site)}`;
 
   // Step 2 State
   const [bodyPartsInjured, setBodyPartsInjured] = useState<string[]>(['None / No Injury']);
