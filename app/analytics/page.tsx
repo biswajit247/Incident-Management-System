@@ -46,7 +46,7 @@ export default function AnalyticsPage() {
 
   if (!isLoaded) return null;
 
-  const [selectedCity, setSelectedCity] = useState<'all' | 'kolkata' | 'bengaluru' | 'mumbai' | 'gurugram' | 'noida' | 'bhubaneswar' | 'chennai' | 'coimbatore' | 'hyderabad' | 'mumbai-goregaon' | 'singapore' | 'tokyo' | 'osaka'>('all');
+  const [selectedCity, setSelectedCity] = useState<'all' | 'kolkata' | 'bengaluru' | 'mumbai' | 'gurugram' | 'noida' | 'bhubaneswar' | 'chennai' | 'coimbatore' | 'hyderabad' | 'mumbai-goregaon' | 'singapore' | 'tokyo' | 'osaka' | 'shanghai' | 'shenzhen' | 'ahmedabad' | 'sydney' | 'beijing' | 'chengdu' | 'hongkong' | 'brisbane' | 'canberra' | 'melbourne' | 'perth'>('all');
 
   const getIncidentSite = (inc: any) => {
     if (inc.id.includes('/ KOL') || inc.tags.includes('kolkata')) return 'Kolkata';
@@ -62,6 +62,17 @@ export default function AnalyticsPage() {
     if (inc.id.includes('/ SIN') || inc.tags.includes('singapore')) return 'Singapore';
     if (inc.id.includes('/ TYO') || inc.tags.includes('tokyo')) return 'Tokyo';
     if (inc.id.includes('/ OSA') || inc.tags.includes('osaka')) return 'Osaka';
+    if (inc.id.includes('/ SHA') || inc.tags.includes('shanghai')) return 'Shanghai';
+    if (inc.id.includes('/ SZX') || inc.tags.includes('shenzhen')) return 'Shenzhen';
+    if (inc.id.includes('/ AMD') || inc.tags.includes('ahmedabad')) return 'Ahmedabad';
+    if (inc.id.includes('/ SYD') || inc.tags.includes('sydney')) return 'Sydney';
+    if (inc.id.includes('/ PEK') || inc.tags.includes('beijing')) return 'Beijing';
+    if (inc.id.includes('/ CTU') || inc.tags.includes('chengdu')) return 'Chengdu';
+    if (inc.id.includes('/ HKG') || inc.tags.includes('hongkong')) return 'Hong Kong';
+    if (inc.id.includes('/ BNE') || inc.tags.includes('brisbane')) return 'Brisbane';
+    if (inc.id.includes('/ CBR') || inc.tags.includes('canberra')) return 'Canberra';
+    if (inc.id.includes('/ MEL') || inc.tags.includes('melbourne')) return 'Melbourne';
+    if (inc.id.includes('/ PER') || inc.tags.includes('perth')) return 'Perth';
     
     const lowercaseTags = inc.tags.map((t: string) => t.toLowerCase());
     if (lowercaseTags.includes('kolkata')) return 'Kolkata';
@@ -77,6 +88,17 @@ export default function AnalyticsPage() {
     if (lowercaseTags.includes('singapore') || lowercaseTags.includes('sin')) return 'Singapore';
     if (lowercaseTags.includes('tokyo') || lowercaseTags.includes('tyo')) return 'Tokyo';
     if (lowercaseTags.includes('osaka') || lowercaseTags.includes('osa')) return 'Osaka';
+    if (lowercaseTags.includes('shanghai') || lowercaseTags.includes('sha')) return 'Shanghai';
+    if (lowercaseTags.includes('shenzhen') || lowercaseTags.includes('szx')) return 'Shenzhen';
+    if (lowercaseTags.includes('ahmedabad') || lowercaseTags.includes('amd')) return 'Ahmedabad';
+    if (lowercaseTags.includes('sydney') || lowercaseTags.includes('syd')) return 'Sydney';
+    if (lowercaseTags.includes('beijing') || lowercaseTags.includes('pek')) return 'Beijing';
+    if (lowercaseTags.includes('chengdu') || lowercaseTags.includes('ctu')) return 'Chengdu';
+    if (lowercaseTags.includes('hongkong') || lowercaseTags.includes('hkg')) return 'Hong Kong';
+    if (lowercaseTags.includes('brisbane') || lowercaseTags.includes('bne')) return 'Brisbane';
+    if (lowercaseTags.includes('canberra') || lowercaseTags.includes('cbr')) return 'Canberra';
+    if (lowercaseTags.includes('melbourne') || lowercaseTags.includes('mel')) return 'Melbourne';
+    if (lowercaseTags.includes('perth') || lowercaseTags.includes('per')) return 'Perth';
     
     return 'Kolkata'; // fallback
   };
@@ -254,6 +276,17 @@ export default function AnalyticsPage() {
               <option value="singapore">Singapore</option>
               <option value="tokyo">Tokyo</option>
               <option value="osaka">Osaka</option>
+              <option value="shanghai">Shanghai</option>
+              <option value="shenzhen">Shenzhen</option>
+              <option value="ahmedabad">Ahmedabad</option>
+              <option value="sydney">Sydney</option>
+              <option value="beijing">Beijing</option>
+              <option value="chengdu">Chengdu</option>
+              <option value="hongkong">Hong Kong</option>
+              <option value="brisbane">Brisbane</option>
+              <option value="canberra">Canberra</option>
+              <option value="melbourne">Melbourne</option>
+              <option value="perth">Perth</option>
             </select>
           </div>
 

@@ -93,6 +93,17 @@ export default function IncidentStepperForm() {
     if (s === 'singapore') return 'SIN';
     if (s === 'tokyo') return 'TYO';
     if (s === 'osaka') return 'OSA';
+    if (s === 'shanghai') return 'SHA';
+    if (s === 'shenzhen') return 'SZX';
+    if (s === 'ahmedabad') return 'AMD';
+    if (s === 'sydney') return 'SYD';
+    if (s === 'beijing') return 'PEK';
+    if (s === 'chengdu') return 'CTU';
+    if (s === 'hongkong') return 'HKG';
+    if (s === 'brisbane') return 'BNE';
+    if (s === 'canberra') return 'CBR';
+    if (s === 'melbourne') return 'MEL';
+    if (s === 'perth') return 'PER';
     return s.toUpperCase().slice(0, 3);
   };
   const incidentNumber = `PRO - 0${randNum} / ${getSiteCode(site)}`;
@@ -247,6 +258,17 @@ export default function IncidentStepperForm() {
                 <option value="singapore">Singapore</option>
                 <option value="tokyo">Tokyo</option>
                 <option value="osaka">Osaka</option>
+                <option value="shanghai">Shanghai</option>
+                <option value="shenzhen">Shenzhen</option>
+                <option value="ahmedabad">Ahmedabad</option>
+                <option value="sydney">Sydney</option>
+                <option value="beijing">Beijing</option>
+                <option value="chengdu">Chengdu</option>
+                <option value="hongkong">Hong Kong</option>
+                <option value="brisbane">Brisbane</option>
+                <option value="canberra">Canberra</option>
+                <option value="melbourne">Melbourne</option>
+                <option value="perth">Perth</option>
               </select>
             </div>
           </div>
