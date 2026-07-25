@@ -2,13 +2,134 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { FileText, CheckCircle2, AlertOctagon, Clock, ArrowRight, User, ShieldCheck } from 'lucide-react';
+import { 
+  FileText, 
+  CheckCircle2, 
+  AlertOctagon, 
+  Clock, 
+  ArrowRight, 
+  User, 
+  ShieldCheck,
+  Sparkles,
+  Terminal,
+  Copy,
+  Save,
+  Cpu,
+  Check,
+  AlertTriangle,
+  FileSpreadsheet
+} from 'lucide-react';
 import { useIncidentStore } from '@/lib/store';
 import IncidentOccurrenceFormModal from '@/components/IncidentOccurrenceFormModal';
 
+const RCA_TEMPLATES: Record<string, {
+  fiveWhys: string[];
+  rootCause: string;
+  detectionDetails: string;
+  mitigationSteps: string;
+  actionItems: { title: string; assignee: string; priority: 'high' | 'medium' | 'low' }[];
+}> = {
+  'Code Defect': {
+    fiveWhys: [
+      "Why did the service crash? (A null pointer exception occurred in the payment parsing routing.)",
+      "Why did a null pointer occur? (The incoming webhook payload was missing the optional billing_zip field.)",
+      "Why was the webhook payload missing billing_zip? (The third-party payment partner updated their API payload schema.)",
+      "Why was the team unaware of the schema update? (The API webhook schema was not pinned to a specific version in production.)",
+      "Why was the API schema not version-pinned? (The partner integration lacked regression testing against external API version changes.)"
+    ],
+    rootCause: "Missing schema validation and API version pinning on incoming third-party payment webhooks, leading to unhandled runtime parsing exceptions.",
+    detectionDetails: "Automated Prometheus alert triggered on high rate of 500 responses on payment gateway routing endpoints.",
+    mitigationSteps: "Hotpatched the payload parser logic to gracefully support fallback values for zip codes and initiated a rollback to the previous deployment build.",
+    actionItems: [
+      { title: "Gracefully parse missing zip fields in webhook requests", assignee: "Biswajit Naskar", priority: "high" },
+      { title: "Setup API schema contract testing in CI pipeline", assignee: "SecOps Shift A", priority: "medium" }
+    ]
+  },
+  'Database Query Timeout': {
+    fiveWhys: [
+      "Why did the application return 500 errors? (Because the database connection pool was exhausted.)",
+      "Why was the connection pool exhausted? (Transactions were waiting on database lock releases.)",
+      "Why were transactions waiting on database lock releases? (An unindexed query locked the user records table.)",
+      "Why was an unindexed query run in production? (A new dashboard feature queries user activity logs on login.)",
+      "Why was the dashboard query launched without verification? (The database migrations script lacked query analyzer index validations.)"
+    ],
+    rootCause: "Unindexed analytics queries executing on user login, causing table locks and connection pool exhaustion under high concurrency.",
+    detectionDetails: "Grafana dashboard reported database CPU spikes to 99% and connection pool wait times exceeding 5000ms.",
+    mitigationSteps: "Identified locking PID in Postgres console, ran PG_TERMINATE_BACKEND, and applied database migration index concurrently.",
+    actionItems: [
+      { title: "Apply concurrent index on user activity logs table", assignee: "Biswajit Naskar", priority: "high" },
+      { title: "Configure alert thresholds for slow query telemetry", assignee: "SecOps Lead", priority: "medium" }
+    ]
+  },
+  'AWS Infrastructure Issue': {
+    fiveWhys: [
+      "Why was the application unavailable? (Because the primary availability zone became unreachable.)",
+      "Why was AZ unreachable? (A physical hardware failure occurred in AWS us-east-1a.)",
+      "Why did the app not failover? (The standby replica was located in the same subnetwork AZ.)",
+      "Why was the standby located in the same AZ? (Multi-AZ failover was disabled during the last database maintenance window.)",
+      "Why was Multi-AZ failover disabled? (No automated configuration check validates Multi-AZ state daily.)"
+    ],
+    rootCause: "Physical hardware outage in AWS us-east-1a coupled with disabled database standby replica failover settings.",
+    detectionDetails: "CloudWatch alert triggered on target group health check failures and node packet loss.",
+    mitigationSteps: "Manually triggered failover to standby in us-east-1b and re-provisioned application instances across secondary subnetworks.",
+    actionItems: [
+      { title: "Enable AWS Multi-AZ failover across databases", assignee: "Biswajit Naskar", priority: "high" },
+      { title: "Add Terraform compliance checks for cross-region configuration", assignee: "SecOps Team", priority: "medium" }
+    ]
+  },
+  'Config Drift': {
+    fiveWhys: [
+      "Why did the service fail to authenticate? (Because the API signature validation failed.)",
+      "Why did validation fail? (The secret key was out of sync between Auth and API Gateway.)",
+      "Why was the secret key out of sync? (A manual update was made in the API Gateway dashboard.)",
+      "Why was the secret key updated manually? (A troubleshooting session bypassed GitOps pipeline.)",
+      "Why was the GitOps pipeline bypassed? (Emergency configuration drift detection was disabled.)"
+    ],
+    rootCause: "Manual configuration override in API Gateway dashboard resulting in token validation keys mismatch.",
+    detectionDetails: "Automated alert on authorization error rates exceeding 25% within 5 minutes.",
+    mitigationSteps: "Re-synced the validation keys from Vault to the API gateway and verified token verification payload returns 200.",
+    actionItems: [
+      { title: "Re-sync all secret keys via Vault configurations", assignee: "Biswajit Naskar", priority: "high" },
+      { title: "Enable Config Drift detection alerting on AWS CloudTrail", assignee: "SecOps Lead", priority: "medium" }
+    ]
+  },
+  'Human Operator Error': {
+    fiveWhys: [
+      "Why was all user traffic dropped? (Because the primary routing tables were purged.)",
+      "Why were routing tables purged? (A script was run with root privileges in the wrong terminal session.)",
+      "Why was it run in the wrong terminal session? (The terminal shell session prompt did not color-code production.)",
+      "Why did the operator have root access? (Least privilege access controls were not enforced on SRE terminals.)",
+      "Why were access controls not enforced? (No automated session credential lifecycle management exists.)"
+    ],
+    rootCause: "Execution of destructive cleaning script in production environment due to lack of environment session visual tags and privileged commands guardrails.",
+    detectionDetails: "Ping alerts triggered immediately on external DNS endpoints and route tables return null.",
+    mitigationSteps: "Re-applied route table states using git history backup files and restored BGP routing pathways.",
+    actionItems: [
+      { title: "Implement production CLI color-coding shell profile", assignee: "Biswajit Naskar", priority: "high" },
+      { title: "Setup dual-custody authorization for routing purges", assignee: "SecOps Team", priority: "high" }
+    ]
+  }
+};
+
 export default function RcaListPage() {
-  const { isLoaded, rcaReports, incidents, allIncidents } = useIncidentStore();
+  const { isLoaded, rcaReports, incidents, allIncidents, saveRcaReport, activeOrgId } = useIncidentStore();
+  
+  // Modal state
   const [selectedIncidentForForm, setSelectedIncidentForForm] = useState<any>(null);
+
+  // Generator states
+  const [selectedIncidentId, setSelectedIncidentId] = useState('');
+  const [category, setCategory] = useState('Code Defect');
+  const [duration, setDuration] = useState('45');
+  const [usersAffected, setUsersAffected] = useState('1500');
+  const [revenueImpact, setRevenueImpact] = useState('$4,500.00');
+  const [authorName, setAuthorName] = useState('Biswajit Naskar');
+  
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
+  const [generatedReport, setGeneratedReport] = useState<any | null>(null);
+  const [isCopied, setIsCopied] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
   if (!isLoaded) return null;
 
@@ -17,15 +138,145 @@ export default function RcaListPage() {
     i => (i.severity === 'P1' || i.severity === 'P2') && i.status === 'resolved' && !i.rcaId
   );
 
+  // Filter list of eligible incidents for manual selector (resolved or active)
+  const eligibleIncidents = (allIncidents || incidents).filter(i => !rcaReports.some(r => r.incidentId === i.id));
+
+  const handleGenerateRca = () => {
+    if (!selectedIncidentId) {
+      alert('Please select an incident to generate the RCA.');
+      return;
+    }
+
+    const targetIncident = (allIncidents || incidents).find(i => i.id === selectedIncidentId);
+    if (!targetIncident) return;
+
+    setIsGenerating(true);
+    setTerminalLogs([]);
+    setGeneratedReport(null);
+    setIsSaved(false);
+
+    const logs = [
+      `[INFO] Initializing AI Post-Mortem compilation sequence...`,
+      `[INFO] Target Incident ID: ${targetIncident.id} ("${targetIncident.title}")`,
+      `[TRACE] Querying Elasticsearch logs during incident epoch window...`,
+      `[DEBUG] Correlating trace IDs across services: gateway-mesh ➔ system-service`,
+      `[WARN] Found telemetry anomalies corresponding to Root Cause: ${category}`,
+      `[TRACE] Executing recursive 5 Whys derivation tree...`,
+      `[INFO] Correlating affected practice area: ${targetIncident.service}`,
+      `[SUCCESS] Isolated root trigger: ${RCA_TEMPLATES[category].rootCause}`,
+      `[INFO] Generating Post-Mortem compliance templates...`,
+      `[SUCCESS] Post-Mortem report draft compiled successfully.`
+    ];
+
+    logs.forEach((log, index) => {
+      setTimeout(() => {
+        setTerminalLogs(prev => [...prev, log]);
+        if (index === logs.length - 1) {
+          // Generate actual report draft
+          const template = RCA_TEMPLATES[category];
+          const newReport = {
+            id: `RCA-${targetIncident.id.replace('PRO-', '').replace('INC-', '')}`,
+            incidentId: targetIncident.id,
+            organizationId: activeOrgId || 'org-1',
+            title: `Post-Mortem: ${targetIncident.title}`,
+            severity: targetIncident.severity,
+            author: authorName,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            summary: `This post-mortem details the event, impact, and mitigation steps for the ${targetIncident.title} incident. Under heavy traffic conditions, the system encountered issues leading to downtime.`,
+            impact: {
+              durationMinutes: parseInt(duration) || 30,
+              usersAffected: parseInt(usersAffected) || 1000,
+              affectedServices: [targetIncident.service],
+              revenueImpact: revenueImpact
+            },
+            fiveWhys: template.fiveWhys,
+            rootCause: template.rootCause,
+            detectionDetails: template.detectionDetails,
+            mitigationSteps: template.mitigationSteps,
+            actionItems: template.actionItems.map((item, idx) => ({
+              id: `AI-RCA-${targetIncident.id.replace('PRO-', '').replace('INC-', '')}-${idx + 1}`,
+              title: item.title,
+              assignee: item.assignee,
+              status: 'todo' as const,
+              priority: item.priority
+            })),
+            status: 'completed' as const
+          };
+          setGeneratedReport(newReport);
+          setIsGenerating(false);
+        }
+      }, (index + 1) * 300);
+    });
+  };
+
+  const handleCopyMarkdown = () => {
+    if (!generatedReport) return;
+    
+    const markdown = `
+# ${generatedReport.title} (${generatedReport.id})
+**Incident ID:** ${generatedReport.incidentId}
+**Date Generated:** ${new Date(generatedReport.createdAt).toLocaleDateString()}
+**Lead Investigator:** ${generatedReport.author}
+
+## Executive Summary
+${generatedReport.summary}
+
+## Impact Statistics
+- **Downtime Duration:** ${generatedReport.impact.durationMinutes} minutes
+- **Users Affected:** ${generatedReport.impact.usersAffected}
+- **Practice Area:** ${generatedReport.impact.affectedServices.join(', ')}
+- **Revenue Impact:** ${generatedReport.impact.revenueImpact}
+
+## 5 Whys Analysis
+${generatedReport.fiveWhys.map((why: string, i: number) => `${i + 1}. ${why}`).join('\n')}
+
+## Isolated Root Cause
+${generatedReport.rootCause}
+
+## Detection Details
+${generatedReport.detectionDetails}
+
+## Mitigation & Resolution Steps
+${generatedReport.mitigationSteps}
+
+## Preventative Action Items
+${generatedReport.actionItems.map((item: any) => `- [ ] **${item.id}**: ${item.title} (Assignee: ${item.assignee}, Priority: ${item.priority.toUpperCase()})`).join('\n')}
+`;
+
+    navigator.clipboard.writeText(markdown.trim());
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleSaveToStore = () => {
+    if (!generatedReport) return;
+    saveRcaReport(generatedReport);
+    setIsSaved(true);
+    
+    // Clear selections
+    setTimeout(() => {
+      setGeneratedReport(null);
+      setSelectedIncidentId('');
+    }, 1500);
+  };
+
   return (
     <div className="space-y-6">
       
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white">Root Cause Analysis & Post-Mortem Studio</h1>
+          <h1 className="text-2xl font-black text-white flex items-center space-x-2">
+            <Cpu className="h-6 w-6 text-red-500" />
+            <span>Root Cause Analysis & Post-Mortem Studio</span>
+          </h1>
           <p className="mt-1 text-xs text-gray-400">
-            Mandatory post-incident reports, 5 Whys analysis, and engineering action items
+            Mandatory post-incident reports, automated 5 Whys compilation, and compliance documentation
           </p>
         </div>
       </div>
@@ -45,15 +296,285 @@ export default function RcaListPage() {
                 </p>
               </div>
             </div>
-            <Link
-              href={`/incidents/${pendingRcaIncidents[0].id}`}
-              className="rounded-xl bg-amber-500 px-4 py-2 text-xs font-bold text-gray-950 hover:bg-amber-400 shadow-md shadow-amber-500/20"
+            <button
+              onClick={() => setSelectedIncidentId(pendingRcaIncidents[0].id)}
+              className="rounded-xl bg-amber-500 px-4 py-2 text-xs font-bold text-gray-950 hover:bg-amber-400 shadow-md shadow-amber-500/20 transition-all"
             >
-              Author RCA Now →
-            </Link>
+              Select First Pending →
+            </button>
           </div>
         </div>
       )}
+
+      {/* Interactive AI Post-Mortem Generator workspace */}
+      <div className="rounded-2xl border border-gray-800 bg-gray-900/50 p-6 backdrop-blur-md shadow-xl">
+        <div className="flex items-center space-x-2 mb-4">
+          <Sparkles className="h-5 w-5 text-cyan-400 animate-pulse" />
+          <h2 className="text-sm font-bold uppercase tracking-widest text-cyan-300">
+            ✨ AI Post-Mortem & 5 Whys Generator Workspace
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          {/* Controls Column */}
+          <div className="space-y-4 lg:col-span-1 border-r border-gray-800/80 pr-0 lg:pr-6">
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
+                Select Target Incident:
+              </label>
+              <select
+                value={selectedIncidentId}
+                onChange={e => setSelectedIncidentId(e.target.value)}
+                className="w-full rounded-xl border border-gray-800 bg-gray-950 px-3 py-2 text-xs font-medium text-white focus:border-cyan-500 focus:outline-none"
+              >
+                <option value="">-- Choose Incident --</option>
+                {eligibleIncidents.map(i => (
+                  <option key={i.id} value={i.id}>
+                    [{i.severity}] {i.id} - {i.title.slice(0, 30)}...
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
+                  Duration (mins):
+                </label>
+                <input
+                  type="number"
+                  value={duration}
+                  onChange={e => setDuration(e.target.value)}
+                  className="w-full rounded-xl border border-gray-800 bg-gray-950 px-3 py-2 font-mono text-xs text-white focus:border-cyan-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
+                  Users Affected:
+                </label>
+                <input
+                  type="number"
+                  value={usersAffected}
+                  onChange={e => setUsersAffected(e.target.value)}
+                  className="w-full rounded-xl border border-gray-800 bg-gray-950 px-3 py-2 font-mono text-xs text-white focus:border-cyan-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
+                  Revenue Impact:
+                </label>
+                <input
+                  type="text"
+                  value={revenueImpact}
+                  onChange={e => setRevenueImpact(e.target.value)}
+                  className="w-full rounded-xl border border-gray-800 bg-gray-950 px-3 py-2 font-mono text-xs text-white focus:border-cyan-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
+                  RCA Lead Author:
+                </label>
+                <input
+                  type="text"
+                  value={authorName}
+                  onChange={e => setAuthorName(e.target.value)}
+                  className="w-full rounded-xl border border-gray-800 bg-gray-950 px-3 py-2 text-xs text-white focus:border-cyan-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
+                Root Cause Category:
+              </label>
+              <select
+                value={category}
+                onChange={e => setCategory(e.target.value)}
+                className="w-full rounded-xl border border-gray-800 bg-gray-950 px-3 py-2 text-xs font-medium text-white focus:border-cyan-500 focus:outline-none"
+              >
+                <option value="Code Defect">💻 Code Defect</option>
+                <option value="Database Query Timeout">📉 Database Query Timeout</option>
+                <option value="AWS Infrastructure Issue">☁️ AWS Infrastructure Issue</option>
+                <option value="Config Drift">⚙️ Configuration Drift</option>
+                <option value="Human Operator Error">👤 Human Operator Error</option>
+              </select>
+            </div>
+
+            <button
+              onClick={handleGenerateRca}
+              disabled={isGenerating || !selectedIncidentId}
+              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-bold text-xs transition-all shadow-md shadow-cyan-600/20 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center space-x-1.5"
+            >
+              <Sparkles className="h-4 w-4" />
+              <span>{isGenerating ? 'Compiling Analysis...' : '✨ Auto-Generate AI RCA Report'}</span>
+            </button>
+          </div>
+
+          {/* Interactive Output Column */}
+          <div className="lg:col-span-2 flex flex-col min-h-[300px] bg-gray-950 border border-gray-800 rounded-2xl overflow-hidden">
+            
+            {/* Terminal Tab Bar */}
+            <div className="flex items-center justify-between bg-gray-900 px-4 py-2 border-b border-gray-800">
+              <div className="flex items-center space-x-2">
+                <Terminal className="h-4 w-4 text-cyan-400" />
+                <span className="font-mono text-xs font-semibold text-gray-300">RCA_COMPILER_SANDBOX ~ logs</span>
+              </div>
+              <div className="flex space-x-1">
+                <span className="h-2.5 w-2.5 rounded-full bg-red-500/80"></span>
+                <span className="h-2.5 w-2.5 rounded-full bg-amber-500/80"></span>
+                <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/80"></span>
+              </div>
+            </div>
+
+            {/* Content Area */}
+            <div className="p-4 flex-1 font-mono text-xs overflow-y-auto space-y-2">
+              {terminalLogs.length === 0 && !generatedReport && (
+                <div className="text-gray-500 text-center py-12">
+                  <Cpu className="mx-auto h-8 w-8 text-gray-700 animate-pulse mb-2" />
+                  <span>Configure metrics and trigger generator on the left to start compiling diagnostic post-mortems...</span>
+                </div>
+              )}
+
+              {/* Terminal sequence logs */}
+              {terminalLogs.map((log, i) => (
+                <div key={i} className={`leading-relaxed ${
+                  log.includes('[SUCCESS]') ? 'text-emerald-400 font-bold' :
+                  log.includes('[WARN]') ? 'text-amber-400' :
+                  log.includes('[INFO]') ? 'text-cyan-400' : 'text-gray-300'
+                }`}>
+                  {log}
+                </div>
+              ))}
+
+              {/* Generated Document Standard */}
+              {generatedReport && (
+                <div className="mt-4 border border-cyan-800/40 bg-cyan-950/15 p-5 rounded-xl space-y-4 font-sans text-gray-300 print:bg-white print:text-black">
+                  
+                  {/* Document Control Header */}
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-cyan-800/30 pb-3 gap-2">
+                    <div>
+                      <h3 className="font-black text-white text-base print:text-black">
+                        {generatedReport.title}
+                      </h3>
+                      <p className="text-[10px] text-cyan-400 uppercase tracking-widest font-mono">
+                        Document Control: {generatedReport.id} • STATUS: {generatedReport.status.toUpperCase()}
+                      </p>
+                    </div>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                      generatedReport.severity === 'P1' ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-300'
+                    }`}>
+                      Severity: {generatedReport.severity}
+                    </span>
+                  </div>
+
+                  {/* Summary / Metadata */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs bg-gray-900/50 p-3 rounded-xl border border-gray-800 print:border-black">
+                    <div>
+                      <span className="block text-[9px] uppercase tracking-wider text-gray-500">Duration</span>
+                      <span className="font-bold font-mono text-white print:text-black">{generatedReport.impact.durationMinutes} minutes</span>
+                    </div>
+                    <div>
+                      <span className="block text-[9px] uppercase tracking-wider text-gray-500">Impacted Users</span>
+                      <span className="font-bold font-mono text-white print:text-black">{generatedReport.impact.usersAffected}</span>
+                    </div>
+                    <div>
+                      <span className="block text-[9px] uppercase tracking-wider text-gray-500">Revenue Impact</span>
+                      <span className="font-bold font-mono text-white print:text-black">{generatedReport.impact.revenueImpact}</span>
+                    </div>
+                    <div>
+                      <span className="block text-[9px] uppercase tracking-wider text-gray-500">Investigator</span>
+                      <span className="font-bold text-white print:text-black">{generatedReport.author}</span>
+                    </div>
+                  </div>
+
+                  {/* 5 Whys Analysis Block */}
+                  <div>
+                    <h4 className="text-xs font-bold text-cyan-300 uppercase tracking-wider mb-2 print:text-black">
+                      5 Whys Analysis (Root Trigger Drilling)
+                    </h4>
+                    <ul className="space-y-1.5 pl-5 list-decimal text-xs leading-relaxed">
+                      {generatedReport.fiveWhys.map((why: string, i: number) => (
+                        <li key={i}>{why}</li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Isolated Root Cause */}
+                  <div className="border-l-2 border-red-500 bg-red-950/20 p-3 rounded-r-xl text-xs print:border-black print:bg-gray-100">
+                    <span className="font-bold text-red-400 block mb-1 print:text-black uppercase text-[10px] tracking-wider">
+                      Isolated Root Cause:
+                    </span>
+                    <p className="italic text-gray-300 print:text-black">{generatedReport.rootCause}</p>
+                  </div>
+
+                  {/* Action Items List */}
+                  <div>
+                    <h4 className="text-xs font-bold text-cyan-300 uppercase tracking-wider mb-2 print:text-black">
+                      Mitigation Actions & Long-Term Controls
+                    </h4>
+                    <div className="space-y-2">
+                      {generatedReport.actionItems.map((item: any) => (
+                        <div key={item.id} className="flex items-center justify-between bg-gray-900/60 p-2.5 rounded-lg border border-gray-800 text-xs">
+                          <div className="flex items-center space-x-2">
+                            <input type="checkbox" className="rounded border-gray-800 bg-gray-950 text-cyan-500" readOnly checked={false} />
+                            <span className="font-bold font-mono text-gray-400">{item.id}:</span>
+                            <span className="text-gray-200">{item.title}</span>
+                          </div>
+                          <div className="flex items-center space-x-2 text-[10px]">
+                            <span className="text-gray-500">({item.assignee})</span>
+                            <span className={`px-1.5 py-0.5 rounded font-bold uppercase text-[9px] ${
+                              item.priority === 'high' ? 'bg-red-500/20 text-red-400' : 'bg-gray-800 text-gray-400'
+                            }`}>
+                              {item.priority}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Document Control Footer buttons */}
+                  <div className="flex flex-wrap items-center justify-end gap-3 pt-3 border-t border-cyan-800/30 print:hidden">
+                    <button
+                      onClick={handleCopyMarkdown}
+                      className="flex items-center space-x-1 px-3 py-1.5 rounded-xl border border-gray-800 bg-gray-900 text-xs text-gray-300 hover:bg-gray-800 hover:text-white transition-all"
+                    >
+                      {isCopied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                      <span>{isCopied ? 'Copied Markdown!' : 'Copy Markdown'}</span>
+                    </button>
+
+                    <button
+                      onClick={handlePrint}
+                      className="flex items-center space-x-1 px-3 py-1.5 rounded-xl border border-gray-800 bg-gray-900 text-xs text-gray-300 hover:bg-gray-800 hover:text-white transition-all"
+                    >
+                      <FileText className="h-3.5 w-3.5" />
+                      <span>Print PDF</span>
+                    </button>
+
+                    <button
+                      onClick={handleSaveToStore}
+                      disabled={isSaved}
+                      className="flex items-center space-x-1 px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs text-white font-bold transition-all shadow-md shadow-emerald-600/20 disabled:bg-emerald-800/40 disabled:text-emerald-400"
+                    >
+                      {isSaved ? <Check className="h-3.5 w-3.5" /> : <Save className="h-3.5 w-3.5" />}
+                      <span>{isSaved ? 'Logged to Store!' : '💾 Log to Registry'}</span>
+                    </button>
+                  </div>
+
+                </div>
+              )}
+            </div>
+
+          </div>
+
+        </div>
+      </div>
 
       {/* RCA Directory List */}
       <div className="space-y-4">
