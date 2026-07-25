@@ -46,19 +46,37 @@ export default function AnalyticsPage() {
 
   if (!isLoaded) return null;
 
-  const [selectedCity, setSelectedCity] = useState<'all' | 'kolkata' | 'bengaluru' | 'mumbai' | 'gurugram'>('all');
+  const [selectedCity, setSelectedCity] = useState<'all' | 'kolkata' | 'bengaluru' | 'mumbai' | 'gurugram' | 'noida' | 'bhubaneswar' | 'chennai' | 'coimbatore' | 'hyderabad' | 'mumbai-goregaon' | 'singapore' | 'tokyo' | 'osaka'>('all');
 
   const getIncidentSite = (inc: any) => {
     if (inc.id.includes('/ KOL') || inc.tags.includes('kolkata')) return 'Kolkata';
     if (inc.id.includes('/ BLR') || inc.tags.includes('bengaluru')) return 'Bengaluru';
     if (inc.id.includes('/ BOM') || inc.tags.includes('mumbai')) return 'Mumbai';
     if (inc.id.includes('/ DEL') || inc.tags.includes('gurugram') || inc.tags.includes('delhi')) return 'Gurugram';
+    if (inc.id.includes('/ NOI') || inc.tags.includes('noida')) return 'Noida';
+    if (inc.id.includes('/ BBS') || inc.tags.includes('bhubaneswar')) return 'Bhubaneswar';
+    if (inc.id.includes('/ MAA') || inc.tags.includes('chennai')) return 'Chennai';
+    if (inc.id.includes('/ CJB') || inc.tags.includes('coimbatore')) return 'Coimbatore';
+    if (inc.id.includes('/ HYD') || inc.tags.includes('hyderabad')) return 'Hyderabad';
+    if (inc.id.includes('/ BOM-G') || inc.tags.includes('mumbai-goregaon')) return 'Mumbai - Goregaon';
+    if (inc.id.includes('/ SIN') || inc.tags.includes('singapore')) return 'Singapore';
+    if (inc.id.includes('/ TYO') || inc.tags.includes('tokyo')) return 'Tokyo';
+    if (inc.id.includes('/ OSA') || inc.tags.includes('osaka')) return 'Osaka';
     
     const lowercaseTags = inc.tags.map((t: string) => t.toLowerCase());
     if (lowercaseTags.includes('kolkata')) return 'Kolkata';
     if (lowercaseTags.includes('bengaluru') || lowercaseTags.includes('blr')) return 'Bengaluru';
     if (lowercaseTags.includes('mumbai') || lowercaseTags.includes('bom')) return 'Mumbai';
     if (lowercaseTags.includes('delhi') || lowercaseTags.includes('gurugram') || lowercaseTags.includes('del')) return 'Gurugram';
+    if (lowercaseTags.includes('noida') || lowercaseTags.includes('noi')) return 'Noida';
+    if (lowercaseTags.includes('bhubaneswar') || lowercaseTags.includes('bbs')) return 'Bhubaneswar';
+    if (lowercaseTags.includes('chennai') || lowercaseTags.includes('maa')) return 'Chennai';
+    if (lowercaseTags.includes('coimbatore') || lowercaseTags.includes('cjb')) return 'Coimbatore';
+    if (lowercaseTags.includes('hyderabad') || lowercaseTags.includes('hyd')) return 'Hyderabad';
+    if (lowercaseTags.includes('mumbai-goregaon') || lowercaseTags.includes('bom-g')) return 'Mumbai - Goregaon';
+    if (lowercaseTags.includes('singapore') || lowercaseTags.includes('sin')) return 'Singapore';
+    if (lowercaseTags.includes('tokyo') || lowercaseTags.includes('tyo')) return 'Tokyo';
+    if (lowercaseTags.includes('osaka') || lowercaseTags.includes('osa')) return 'Osaka';
     
     return 'Kolkata'; // fallback
   };
@@ -227,6 +245,15 @@ export default function AnalyticsPage() {
               <option value="bengaluru">Bengaluru</option>
               <option value="mumbai">Mumbai</option>
               <option value="gurugram">Gurugram</option>
+              <option value="noida">Noida</option>
+              <option value="bhubaneswar">Bhubaneswar</option>
+              <option value="chennai">Chennai</option>
+              <option value="coimbatore">Coimbatore</option>
+              <option value="hyderabad">Hyderabad</option>
+              <option value="mumbai-goregaon">Mumbai - Goregaon</option>
+              <option value="singapore">Singapore</option>
+              <option value="tokyo">Tokyo</option>
+              <option value="osaka">Osaka</option>
             </select>
           </div>
 

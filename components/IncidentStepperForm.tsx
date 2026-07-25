@@ -84,6 +84,15 @@ export default function IncidentStepperForm() {
     if (s === 'mumbai') return 'BOM';
     if (s === 'bengaluru') return 'BLR';
     if (s === 'gurugram') return 'DEL';
+    if (s === 'noida') return 'NOI';
+    if (s === 'bhubaneswar') return 'BBS';
+    if (s === 'chennai') return 'MAA';
+    if (s === 'coimbatore') return 'CJB';
+    if (s === 'hyderabad') return 'HYD';
+    if (s === 'mumbai-goregaon') return 'BOM-G';
+    if (s === 'singapore') return 'SIN';
+    if (s === 'tokyo') return 'TYO';
+    if (s === 'osaka') return 'OSA';
     return s.toUpperCase().slice(0, 3);
   };
   const incidentNumber = `PRO - 0${randNum} / ${getSiteCode(site)}`;
@@ -229,6 +238,15 @@ export default function IncidentStepperForm() {
                 <option value="mumbai">Mumbai</option>
                 <option value="bengaluru">Bengaluru</option>
                 <option value="gurugram">Gurugram</option>
+                <option value="noida">Noida</option>
+                <option value="bhubaneswar">Bhubaneswar</option>
+                <option value="chennai">Chennai</option>
+                <option value="coimbatore">Coimbatore</option>
+                <option value="hyderabad">Hyderabad</option>
+                <option value="mumbai-goregaon">Mumbai - Goregaon</option>
+                <option value="singapore">Singapore</option>
+                <option value="tokyo">Tokyo</option>
+                <option value="osaka">Osaka</option>
               </select>
             </div>
           </div>
