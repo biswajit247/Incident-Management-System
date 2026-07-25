@@ -19,6 +19,7 @@ import RcaEditor from '@/components/RcaEditor';
 import IncidentOccurrenceFormModal from '@/components/IncidentOccurrenceFormModal';
 import TelemetryChart from '@/components/TelemetryChart';
 import KolkataFloorMap from '@/components/KolkataFloorMap';
+import SreBridgeSimulator from '@/components/SreBridgeSimulator';
 import { useIncidentStore } from '@/lib/store';
 import { MOCK_RESPONDERS } from '@/lib/mockData';
 import { IncidentStatus } from '@/lib/types';
@@ -41,7 +42,7 @@ export default function IncidentDetailClient({ id }: IncidentDetailClientProps) 
     rcaReports
   } = useIncidentStore();
 
-  const [activeTab, setActiveTab] = useState<'warroom' | 'timeline' | 'rca'>('warroom');
+  const [activeTab, setActiveTab] = useState<'warroom' | 'timeline' | 'rca' | 'bridge'>('warroom');
   const [noteInput, setNoteInput] = useState('');
   const [isIofModalOpen, setIsIofModalOpen] = useState(false);
 
@@ -258,9 +259,25 @@ export default function IncidentDetailClient({ id }: IncidentDetailClientProps) 
             </span>
           )}
         </button>
+
+        <button
+          onClick={() => setActiveTab('bridge')}
+          className={`flex items-center space-x-2 border-b-2 px-4 py-2 font-bold transition-colors ${
+            activeTab === 'bridge'
+              ? 'border-red-500 text-red-400'
+              : 'border-transparent text-gray-400 hover:text-gray-200'
+          }`}
+        >
+          <Video className="h-4 w-4" />
+          <span>Live Voice Bridge</span>
+        </button>
       </div>
 
       {/* Tab Content Display */}
+      {activeTab === 'bridge' && (
+        <SreBridgeSimulator incident={incident} />
+      )}
+
       {activeTab === 'warroom' && (
         <WarRoomChat incident={incident} />
       )}
