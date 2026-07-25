@@ -27,77 +27,104 @@ export interface NotificationLog {
 
 const STORAGE_KEY = 'incident_system_state_v6';
 
+// Global shared state storage object to prevent desynchronization
+let globalState = {
+  organizations: MOCK_ORGANIZATIONS,
+  activeOrgId: 'org-protiviti-in',
+  currentUser: null as User | null,
+  jwtToken: null as string | null,
+  users: [] as User[],
+  rawIncidents: [] as Incident[],
+  timelineEvents: {} as Record<string, TimelineEvent[]>,
+  warRoomMessages: {} as Record<string, WarRoomMessage[]>,
+  rawShifts: [] as OnCallShift[],
+  rawRcaReports: [] as RcaReport[],
+  notifications: [] as NotificationLog[],
+  isLoaded: false,
+};
+
+const listeners = new Set<() => void>();
+
+const notify = () => {
+  listeners.forEach(l => l());
+};
+
+const saveToLocalStorage = () => {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      incidents: globalState.rawIncidents,
+      timelineEvents: globalState.timelineEvents,
+      warRoomMessages: globalState.warRoomMessages,
+      shifts: globalState.rawShifts,
+      rcaReports: globalState.rawRcaReports,
+      notifications: globalState.notifications,
+      users: globalState.users,
+      activeOrgId: globalState.activeOrgId,
+      currentUser: globalState.currentUser,
+      jwtToken: globalState.jwtToken,
+      organizations: globalState.organizations,
+    }));
+  } catch (e) {
+    console.error('Failed to save state:', e);
+  }
+};
+
 export function useIncidentStore() {
-  const [organizations, setOrganizations] = useState<Organization[]>(MOCK_ORGANIZATIONS);
-  const [activeOrgId, setActiveOrgId] = useState<string>('org-protiviti-in');
+  const [, setTick] = useState(0);
 
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [jwtToken, setJwtToken] = useState<string | null>(null);
-  const [users, setUsers] = useState<User[]>([]);
-
-  const [rawIncidents, setIncidents] = useState<Incident[]>([]);
-  const [timelineEvents, setTimelineEvents] = useState<Record<string, TimelineEvent[]>>({});
-  const [warRoomMessages, setWarRoomMessages] = useState<Record<string, WarRoomMessage[]>>({});
-  const [rawShifts, setShifts] = useState<OnCallShift[]>([]);
-  const [rawRcaReports, setRcaReports] = useState<RcaReport[]>([]);
-  const [notifications, setNotifications] = useState<NotificationLog[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  // Initialize from LocalStorage or mockData
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        setIncidents(parsed.incidents || INITIAL_INCIDENTS);
-        setTimelineEvents(parsed.timelineEvents || INITIAL_TIMELINE_EVENTS);
-        setWarRoomMessages(parsed.warRoomMessages || INITIAL_WAR_ROOM_MESSAGES);
-        setShifts(parsed.shifts || INITIAL_ON_CALL_SHIFTS);
-        setRcaReports(parsed.rcaReports || INITIAL_RCA_REPORTS);
-        setNotifications(parsed.notifications || []);
-        setUsers(parsed.users || MOCK_USERS);
-      } else {
-        setIncidents(INITIAL_INCIDENTS);
-        setTimelineEvents(INITIAL_TIMELINE_EVENTS);
-        setWarRoomMessages(INITIAL_WAR_ROOM_MESSAGES);
-        setShifts(INITIAL_ON_CALL_SHIFTS);
-        setRcaReports(INITIAL_RCA_REPORTS);
-        setUsers(MOCK_USERS);
+    const forceUpdate = () => setTick(t => t + 1);
+    listeners.add(forceUpdate);
+    
+    // Load from LocalStorage once
+    if (!globalState.isLoaded && typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          globalState.rawIncidents = parsed.incidents || INITIAL_INCIDENTS;
+          globalState.timelineEvents = parsed.timelineEvents || INITIAL_TIMELINE_EVENTS;
+          globalState.warRoomMessages = parsed.warRoomMessages || INITIAL_WAR_ROOM_MESSAGES;
+          globalState.rawShifts = parsed.shifts || INITIAL_ON_CALL_SHIFTS;
+          globalState.rawRcaReports = parsed.rcaReports || INITIAL_RCA_REPORTS;
+          globalState.notifications = parsed.notifications || [];
+          globalState.users = parsed.users || MOCK_USERS;
+          globalState.activeOrgId = parsed.activeOrgId || 'org-protiviti-in';
+          globalState.currentUser = parsed.currentUser || null;
+          globalState.jwtToken = parsed.jwtToken || null;
+          globalState.organizations = parsed.organizations || MOCK_ORGANIZATIONS;
+        } else {
+          globalState.rawIncidents = INITIAL_INCIDENTS;
+          globalState.timelineEvents = INITIAL_TIMELINE_EVENTS;
+          globalState.warRoomMessages = INITIAL_WAR_ROOM_MESSAGES;
+          globalState.rawShifts = INITIAL_ON_CALL_SHIFTS;
+          globalState.rawRcaReports = INITIAL_RCA_REPORTS;
+          globalState.users = MOCK_USERS;
+        }
+      } catch (e) {
+        console.error('Failed to load state:', e);
+        globalState.rawIncidents = INITIAL_INCIDENTS;
+        globalState.timelineEvents = INITIAL_TIMELINE_EVENTS;
+        globalState.warRoomMessages = INITIAL_WAR_ROOM_MESSAGES;
+        globalState.rawShifts = INITIAL_ON_CALL_SHIFTS;
+        globalState.rawRcaReports = INITIAL_RCA_REPORTS;
+        globalState.users = MOCK_USERS;
       }
-    } catch (e) {
-      console.error('Failed to load storage state:', e);
-      setIncidents(INITIAL_INCIDENTS);
-      setTimelineEvents(INITIAL_TIMELINE_EVENTS);
-      setWarRoomMessages(INITIAL_WAR_ROOM_MESSAGES);
-      setShifts(INITIAL_ON_CALL_SHIFTS);
-      setRcaReports(INITIAL_RCA_REPORTS);
-      setUsers(MOCK_USERS);
+      globalState.isLoaded = true;
+      notify();
     }
-    setIsLoaded(true);
-  }, []);
 
-  // Save to LocalStorage
-  useEffect(() => {
-    if (!isLoaded) return;
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        incidents: rawIncidents,
-        timelineEvents,
-        warRoomMessages,
-        shifts: rawShifts,
-        rcaReports: rawRcaReports,
-        notifications,
-        users
-      }));
-    } catch (e) {
-      console.error('Failed to save storage state:', e);
-    }
-  }, [rawIncidents, timelineEvents, warRoomMessages, rawShifts, rawRcaReports, notifications, users, isLoaded]);
+    return () => {
+      listeners.delete(forceUpdate);
+    };
+  }, []);
 
   // Periodic SLA Breach Checker
   useEffect(() => {
     const interval = setInterval(() => {
-      setIncidents(prev => prev.map(inc => {
+      let changed = false;
+      const updated = globalState.rawIncidents.map(inc => {
         if (inc.status === 'resolved') return inc;
         
         let ttaBreached = inc.ttaBreached;
@@ -105,19 +132,31 @@ export function useIncidentStore() {
 
         if (inc.status === 'triggered' && !ttaBreached) {
           const { isBreached } = getTimeRemaining(inc.ttaDeadline);
-          if (isBreached) ttaBreached = true;
+          if (isBreached) {
+            ttaBreached = true;
+            changed = true;
+          }
         }
 
         if (!ttrBreached) {
           const { isBreached } = getTimeRemaining(inc.ttrDeadline);
-          if (isBreached) ttrBreached = true;
+          if (isBreached) {
+            ttrBreached = true;
+            changed = true;
+          }
         }
 
         if (ttaBreached !== inc.ttaBreached || ttrBreached !== inc.ttrBreached) {
           return { ...inc, ttaBreached, ttrBreached };
         }
         return inc;
-      }));
+      });
+
+      if (changed) {
+        globalState.rawIncidents = updated;
+        saveToLocalStorage();
+        notify();
+      }
     }, 5000);
 
     return () => clearInterval(interval);
@@ -135,18 +174,22 @@ export function useIncidentStore() {
       timestamp: new Date().toISOString(),
       status: 'DELIVERED',
     };
-    setNotifications(prev => [newNotif, ...prev]);
+    globalState.notifications = [newNotif, ...globalState.notifications];
+    saveToLocalStorage();
+    notify();
   };
 
-  const activeOrganization = organizations.find(o => o.id === activeOrgId) || organizations[0];
+  const activeOrganization = globalState.organizations.find(o => o.id === globalState.activeOrgId) || globalState.organizations[0];
 
   const updateOrganizationSla = (orgId: string, newSlaSettings: SLAConfig) => {
-    setOrganizations(prev => prev.map(o => o.id === orgId ? { ...o, slaSettings: newSlaSettings } : o));
+    globalState.organizations = globalState.organizations.map(o => o.id === orgId ? { ...o, slaSettings: newSlaSettings } : o);
+    saveToLocalStorage();
+    notify();
   };
 
-  const incidents = activeOrgId === 'ALL' ? rawIncidents : rawIncidents.filter(i => i.organizationId === activeOrgId);
-  const shifts = activeOrgId === 'ALL' ? rawShifts : rawShifts.filter(s => s.organizationId === activeOrgId);
-  const rcaReports = activeOrgId === 'ALL' ? rawRcaReports : rawRcaReports.filter(r => r.organizationId === activeOrgId);
+  const incidents = globalState.activeOrgId === 'ALL' ? globalState.rawIncidents : globalState.rawIncidents.filter(i => i.organizationId === globalState.activeOrgId);
+  const shifts = globalState.activeOrgId === 'ALL' ? globalState.rawShifts : globalState.rawShifts.filter(s => s.organizationId === globalState.activeOrgId);
+  const rcaReports = globalState.activeOrgId === 'ALL' ? globalState.rawRcaReports : globalState.rawRcaReports.filter(r => r.organizationId === globalState.activeOrgId);
 
   // Add Incident
   const createIncident = (data: {
@@ -160,12 +203,12 @@ export function useIncidentStore() {
     const createdAt = new Date().toISOString();
     const prefix = activeOrganization.prefix || 'PRO';
     const id = `${prefix}-${Math.floor(1000 + Math.random() * 9000)}`;
-    const orgId = activeOrgId === 'ALL' ? organizations[0].id : activeOrgId;
+    const orgId = globalState.activeOrgId === 'ALL' ? globalState.organizations[0].id : globalState.activeOrgId;
 
     const { ttaDeadline, ttrDeadline } = calculateSLADeadlines(createdAt, data.severity);
 
     // Pick responder based on service shift
-    const matchingShift = rawShifts.find(s => s.service === data.service && s.organizationId === orgId) || rawShifts[0];
+    const matchingShift = globalState.rawShifts.find(s => s.service === data.service && s.organizationId === orgId) || globalState.rawShifts[0];
     const assignedTo = matchingShift.tier1;
 
     const newIncident: Incident = {
@@ -206,22 +249,24 @@ export function useIncidentStore() {
       isSystem: true,
     };
 
-    setIncidents(prev => [newIncident, ...prev]);
-    setTimelineEvents(prev => ({ ...prev, [id]: [initialEvent] }));
-    setWarRoomMessages(prev => ({ ...prev, [id]: [initialMessage] }));
+    globalState.rawIncidents = [newIncident, ...globalState.rawIncidents];
+    globalState.timelineEvents = { ...globalState.timelineEvents, [id]: [initialEvent] };
+    globalState.warRoomMessages = { ...globalState.warRoomMessages, [id]: [initialMessage] };
 
     dispatchNotification(id, assignedTo, 'SMS', `[URGENT ${data.severity}] ${id}: ${data.title}. Acknowledge at: https://ops.company.internal/incidents/${id}`);
     if (data.severity === 'P1') {
       dispatchNotification(id, assignedTo, 'VOICE_CALL', `P1 Critical Alert triggered for ${data.service}. Immediate acknowledgement required.`);
     }
 
+    saveToLocalStorage();
+    notify();
     return newIncident;
   };
 
   // Acknowledge Incident
   const acknowledgeIncident = (incidentId: string, responderName?: string) => {
     const ackTime = new Date().toISOString();
-    setIncidents(prev => prev.map(inc => {
+    globalState.rawIncidents = globalState.rawIncidents.map(inc => {
       if (inc.id === incidentId) {
         return {
           ...inc,
@@ -230,7 +275,7 @@ export function useIncidentStore() {
         };
       }
       return inc;
-    }));
+    });
 
     const author = responderName || 'On-Call Responder';
     const event: TimelineEvent = {
@@ -242,16 +287,19 @@ export function useIncidentStore() {
       content: `Acknowledged incident by ${author}. SLA TTA timer stopped.`,
     };
 
-    setTimelineEvents(prev => ({
-      ...prev,
-      [incidentId]: [...(prev[incidentId] || []), event],
-    }));
+    globalState.timelineEvents = {
+      ...globalState.timelineEvents,
+      [incidentId]: [...(globalState.timelineEvents[incidentId] || []), event],
+    };
+
+    saveToLocalStorage();
+    notify();
   };
 
   // Update Status
   const updateIncidentStatus = (incidentId: string, newStatus: IncidentStatus, authorName: string) => {
     const updateTime = new Date().toISOString();
-    setIncidents(prev => prev.map(inc => {
+    globalState.rawIncidents = globalState.rawIncidents.map(inc => {
       if (inc.id === incidentId) {
         const isResolving = newStatus === 'resolved';
         return {
@@ -261,7 +309,7 @@ export function useIncidentStore() {
         };
       }
       return inc;
-    }));
+    });
 
     const event: TimelineEvent = {
       id: `te-${Date.now()}`,
@@ -272,10 +320,10 @@ export function useIncidentStore() {
       content: `Changed incident status to ${newStatus.toUpperCase()}.`,
     };
 
-    setTimelineEvents(prev => ({
-      ...prev,
-      [incidentId]: [...(prev[incidentId] || []), event],
-    }));
+    globalState.timelineEvents = {
+      ...globalState.timelineEvents,
+      [incidentId]: [...(globalState.timelineEvents[incidentId] || []), event],
+    };
 
     const systemMsg: WarRoomMessage = {
       id: `wm-${Date.now()}`,
@@ -286,21 +334,24 @@ export function useIncidentStore() {
       isSystem: true,
     };
 
-    setWarRoomMessages(prev => ({
-      ...prev,
-      [incidentId]: [...(prev[incidentId] || []), systemMsg],
-    }));
+    globalState.warRoomMessages = {
+      ...globalState.warRoomMessages,
+      [incidentId]: [...(globalState.warRoomMessages[incidentId] || []), systemMsg],
+    };
+
+    saveToLocalStorage();
+    notify();
   };
 
   // Reassign Responder
   const reassignResponder = (incidentId: string, newResponder: Responder, authorName: string) => {
     const updateTime = new Date().toISOString();
-    setIncidents(prev => prev.map(inc => {
+    globalState.rawIncidents = globalState.rawIncidents.map(inc => {
       if (inc.id === incidentId) {
         return { ...inc, assignedTo: newResponder };
       }
       return inc;
-    }));
+    });
 
     const event: TimelineEvent = {
       id: `te-${Date.now()}`,
@@ -311,12 +362,14 @@ export function useIncidentStore() {
       content: `Reassigned incident commander to ${newResponder.name} (${newResponder.role}).`,
     };
 
-    setTimelineEvents(prev => ({
-      ...prev,
-      [incidentId]: [...(prev[incidentId] || []), event],
-    }));
+    globalState.timelineEvents = {
+      ...globalState.timelineEvents,
+      [incidentId]: [...(globalState.timelineEvents[incidentId] || []), event],
+    };
 
+    saveToLocalStorage();
     dispatchNotification(incidentId, newResponder, 'SMS', `[Reassigned] You are now primary commander for ${incidentId}.`);
+    notify();
   };
 
   // Add War Room Message
@@ -330,10 +383,13 @@ export function useIncidentStore() {
       timestamp,
     };
 
-    setWarRoomMessages(prev => ({
-      ...prev,
-      [incidentId]: [...(prev[incidentId] || []), newMsg],
-    }));
+    globalState.warRoomMessages = {
+      ...globalState.warRoomMessages,
+      [incidentId]: [...(globalState.warRoomMessages[incidentId] || []), newMsg],
+    };
+
+    saveToLocalStorage();
+    notify();
   };
 
   // Add Timeline Note
@@ -348,54 +404,63 @@ export function useIncidentStore() {
       content: note,
     };
 
-    setTimelineEvents(prev => ({
-      ...prev,
-      [incidentId]: [...(prev[incidentId] || []), newEvent],
-    }));
+    globalState.timelineEvents = {
+      ...globalState.timelineEvents,
+      [incidentId]: [...(globalState.timelineEvents[incidentId] || []), newEvent],
+    };
+
+    saveToLocalStorage();
+    notify();
   };
 
   // Create or Update RCA Report
   const saveRcaReport = (report: RcaReport) => {
-    setRcaReports(prev => {
-      const idx = prev.findIndex(r => r.id === report.id);
-      if (idx >= 0) {
-        const copy = [...prev];
-        copy[idx] = report;
-        return copy;
-      }
-      return [report, ...prev];
-    });
+    const idx = globalState.rawRcaReports.findIndex(r => r.id === report.id);
+    if (idx >= 0) {
+      globalState.rawRcaReports[idx] = report;
+    } else {
+      globalState.rawRcaReports = [report, ...globalState.rawRcaReports];
+    }
 
     // Link RCA to Incident
-    setIncidents(prev => prev.map(inc => {
+    globalState.rawIncidents = globalState.rawIncidents.map(inc => {
       if (inc.id === report.incidentId) {
         return { ...inc, rcaId: report.id };
       }
       return inc;
-    }));
+    });
+
+    saveToLocalStorage();
+    notify();
   };
 
   // Reset to default mock data
   const resetToDefault = () => {
-    localStorage.removeItem(STORAGE_KEY);
-    setOrganizations(MOCK_ORGANIZATIONS);
-    setActiveOrgId('org-protiviti-in');
-    setIncidents(INITIAL_INCIDENTS);
-    setTimelineEvents(INITIAL_TIMELINE_EVENTS);
-    setWarRoomMessages(INITIAL_WAR_ROOM_MESSAGES);
-    setShifts(INITIAL_ON_CALL_SHIFTS);
-    setRcaReports(INITIAL_RCA_REPORTS);
-    setNotifications([]);
-    setUsers(MOCK_USERS);
-    setCurrentUser(null);
-    setJwtToken(null);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+    globalState.organizations = MOCK_ORGANIZATIONS;
+    globalState.activeOrgId = 'org-protiviti-in';
+    globalState.currentUser = null;
+    globalState.jwtToken = null;
+    globalState.users = MOCK_USERS;
+    globalState.rawIncidents = INITIAL_INCIDENTS;
+    globalState.timelineEvents = INITIAL_TIMELINE_EVENTS;
+    globalState.warRoomMessages = INITIAL_WAR_ROOM_MESSAGES;
+    globalState.rawShifts = INITIAL_ON_CALL_SHIFTS;
+    globalState.rawRcaReports = INITIAL_RCA_REPORTS;
+    globalState.notifications = [];
+    
+    saveToLocalStorage();
+    notify();
   };
+
   // Login Handler
   const login = (email: string, pass: string) => {
-    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+    const user = globalState.users.find(u => u.email.toLowerCase() === email.toLowerCase());
     if (user) {
-      setCurrentUser(user);
-      setActiveOrgId(user.organizationId);
+      globalState.currentUser = user;
+      globalState.activeOrgId = user.organizationId;
       const payload = {
         sub: user.id,
         email: user.email,
@@ -404,7 +469,10 @@ export function useIncidentStore() {
         exp: Math.floor(Date.now() / 1000) + 86400,
       };
       const token = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${btoa(JSON.stringify(payload))}.sig`;
-      setJwtToken(token);
+      globalState.jwtToken = token;
+      
+      saveToLocalStorage();
+      notify();
       return token;
     }
     return null;
@@ -412,13 +480,17 @@ export function useIncidentStore() {
 
   // Logout Handler
   const logout = () => {
-    setCurrentUser(null);
-    setJwtToken(null);
+    globalState.currentUser = null;
+    globalState.jwtToken = null;
+    saveToLocalStorage();
+    notify();
   };
 
   // Create On Call Shift Rotation
   const createOnCallShift = (shift: OnCallShift) => {
-    setShifts(prev => [...prev, shift]);
+    globalState.rawShifts = [...globalState.rawShifts, shift];
+    saveToLocalStorage();
+    notify();
   };
 
   // SLA Stress & Chaos Simulation
@@ -428,8 +500,8 @@ export function useIncidentStore() {
       return;
     }
 
-    const orgId = activeOrgId === 'ALL' ? 'org-protiviti-in' : activeOrgId;
-    const matchingShift = rawShifts.find(s => s.organizationId === orgId) || rawShifts[0];
+    const orgId = globalState.activeOrgId === 'ALL' ? 'org-protiviti-in' : globalState.activeOrgId;
+    const matchingShift = globalState.rawShifts.find(s => s.organizationId === orgId) || globalState.rawShifts[0];
 
     if (type === 'traffic') {
       const createdAt = new Date().toISOString();
@@ -458,9 +530,8 @@ export function useIncidentStore() {
         }
       };
 
-      setIncidents(prev => [newInc, ...prev]);
+      globalState.rawIncidents = [newInc, ...globalState.rawIncidents];
     } else if (type === 'breach') {
-      // Create an incident that was triggered 45 minutes ago to force TTA & TTR breaches
       const createdAt = new Date(Date.now() - 45 * 60 * 1000).toISOString();
       const id = `PRO-BREACH-${Math.floor(1000 + Math.random() * 9000)}`;
       const { ttaDeadline, ttrDeadline } = calculateSLADeadlines(createdAt, 'P1');
@@ -482,47 +553,56 @@ export function useIncidentStore() {
         tags: ['sla-breach', 'sla-test', 'timeout-escalation'],
       };
 
-      setIncidents(prev => [newInc, ...prev]);
+      globalState.rawIncidents = [newInc, ...globalState.rawIncidents];
     }
+    saveToLocalStorage();
+    notify();
   };
 
   const addUser = (newUser: User) => {
-    setUsers(prev => {
-      const idx = prev.findIndex(u => u.email.toLowerCase() === newUser.email.toLowerCase());
-      if (idx >= 0) {
-        const copy = [...prev];
-        copy[idx] = newUser;
-        return copy;
-      }
-      return [...prev, newUser];
-    });
+    const idx = globalState.users.findIndex(u => u.email.toLowerCase() === newUser.email.toLowerCase());
+    if (idx >= 0) {
+      globalState.users[idx] = newUser;
+    } else {
+      globalState.users = [...globalState.users, newUser];
+    }
+    saveToLocalStorage();
+    notify();
   };
 
   const removeUser = (userId: string) => {
-    setUsers(prev => prev.filter(u => u.id !== userId));
+    globalState.users = globalState.users.filter(u => u.id !== userId);
+    saveToLocalStorage();
+    notify();
+  };
+
+  const setActiveOrgId = (orgId: string) => {
+    globalState.activeOrgId = orgId;
+    saveToLocalStorage();
+    notify();
   };
 
   return {
-    isLoaded,
-    currentUser,
-    jwtToken,
+    isLoaded: globalState.isLoaded,
+    currentUser: globalState.currentUser,
+    jwtToken: globalState.jwtToken,
     login,
     logout,
-    organizations,
-    activeOrgId,
+    organizations: globalState.organizations,
+    activeOrgId: globalState.activeOrgId,
     activeOrganization,
     setActiveOrgId,
     updateOrganizationSla,
     incidents,
-    allIncidents: rawIncidents,
-    timelineEvents,
-    warRoomMessages,
+    allIncidents: globalState.rawIncidents,
+    timelineEvents: globalState.timelineEvents,
+    warRoomMessages: globalState.warRoomMessages,
     shifts,
-    allShifts: rawShifts,
-    rcaReports,
-    allRcaReports: rawRcaReports,
-    notifications,
-    users,
+    allShifts: globalState.rawShifts,
+    rcaReports: globalState.rawRcaReports,
+    allRcaReports: globalState.rawRcaReports,
+    notifications: globalState.notifications,
+    users: globalState.users,
     createIncident,
     acknowledgeIncident,
     updateIncidentStatus,

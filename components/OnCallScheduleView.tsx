@@ -34,6 +34,68 @@ export default function OnCallScheduleView() {
   const [selectedShift, setSelectedShift] = useState<OnCallShift>(shifts[0] || shifts[0]);
   const [testPagedMsg, setTestPagedMsg] = useState<string | null>(null);
 
+  // Simulation states
+  const [simTime, setSimTime] = useState(0);
+  const [isSimulating, setIsSimulating] = useState(false);
+  const [simLogs, setSimLogs] = useState<{ time: string; msg: string; type: 'info' | 'alert' | 'success' }[]>([]);
+  const [simInterval, setSimInterval] = useState<any>(null);
+
+  const stopSimulation = () => {
+    if (simInterval) clearInterval(simInterval);
+    setIsSimulating(false);
+    setSimInterval(null);
+  };
+
+  const startSimulation = () => {
+    stopSimulation();
+    setIsSimulating(true);
+    setSimTime(0);
+    setSimLogs([
+      { time: '0m', msg: `🚨 Emergency Alert received for ${selectedShift.service}. Initiating policy router.`, type: 'alert' },
+      { time: '0m', msg: `📨 Sent SMS dispatch to Primary On-Call: ${selectedShift.tier1.name} (${selectedShift.tier1.phone})`, type: 'info' }
+    ]);
+
+    let current = 0;
+    const interval = setInterval(() => {
+      current += 1;
+      setSimTime(current);
+
+      if (current === 5) {
+        setSimLogs(prev => [
+          ...prev,
+          { time: '5m', msg: `⏳ 5 minutes elapsed. No response from ${selectedShift.tier1.name}. Retrying contact.`, type: 'info' }
+        ]);
+      } else if (current === selectedShift.escalationTimeoutMins) {
+        setSimLogs(prev => [
+          ...prev,
+          { time: `${current}m`, msg: `🔥 Primary SLA Breached (${selectedShift.escalationTimeoutMins}m). Escalating to Secondary Backup: ${selectedShift.tier2.name}.`, type: 'alert' },
+          { time: `${current}m`, msg: `📞 Dialing Twilio Voice Call alert to: ${selectedShift.tier2.phone}`, type: 'info' }
+        ]);
+      } else if (current === 20) {
+        setSimLogs(prev => [
+          ...prev,
+          { time: '20m', msg: `💬 ChatOps Slack channel #incident-${selectedShift.teamName.toLowerCase().replace(/\s+/g, '-')} created automatically.`, type: 'info' }
+        ]);
+      } else if (current === 30) {
+        setSimLogs(prev => [
+          ...prev,
+          { time: '30m', msg: `🚨 Secondary SLA Breached. Routing priority alert to Executive Lead: ${selectedShift.executiveEscalation.name}.`, type: 'alert' },
+          { time: '30m', msg: `📨 Sent executive paging alert to: ${selectedShift.executiveEscalation.email}`, type: 'info' },
+          { time: '30m', msg: `🌐 Jitsi video war room bridge provisioned automatically.`, type: 'success' }
+        ]);
+      } else if (current === 40) {
+        setSimLogs(prev => [
+          ...prev,
+          { time: '40m', msg: `✅ Incident Commander acknowledged via Slack interface. SLA timer halted.`, type: 'success' }
+        ]);
+      } else if (current >= 45) {
+        clearInterval(interval);
+        setIsSimulating(false);
+      }
+    }, 450); // 450ms = 1 simulated minute
+    setSimInterval(interval);
+  };
+
   // Twilio Pager Logs state
   const [pagerLogs, setPagerLogs] = useState<PagerLogEntry[]>([
     {
@@ -282,39 +344,148 @@ export default function OnCallScheduleView() {
       </div>
 
       {/* Escalation Workflow Step Diagram */}
-      <div className="rounded-2xl border border-gray-800 bg-gray-900/60 p-6 backdrop-blur-md">
-        <h3 className="font-bold text-white text-base mb-4 flex items-center space-x-2">
-          <Zap className="h-4 w-4 text-amber-400" />
-          <span>Automated Escalation Rule Engine</span>
-        </h3>
+      <div className="rounded-2xl border border-gray-800 bg-gray-900/60 p-6 backdrop-blur-md space-y-6">
+        
+        {/* Header & Controls */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-800 pb-4">
+          <div>
+            <h3 className="font-bold text-white text-base flex items-center space-x-2">
+              <Zap className="h-4 w-4 text-cyan-400" />
+              <span>SLA Escalation Policy Simulator</span>
+            </h3>
+            <p className="text-xs text-gray-400 mt-1">
+              Visualize how alerts automatically route through the escalation policy for **{selectedShift.teamName}**
+            </p>
+          </div>
 
+          <div className="flex items-center space-x-3">
+            {isSimulating ? (
+              <button
+                onClick={stopSimulation}
+                className="flex items-center space-x-1.5 rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-2 text-xs font-bold text-red-400 hover:bg-red-500/20 transition-all"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                </span>
+                <span>Stop Simulation</span>
+              </button>
+            ) : (
+              <button
+                onClick={startSimulation}
+                className="flex items-center space-x-1.5 rounded-xl bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-cyan-600/20 transition-all"
+              >
+                <span>▶️ Run Escalation Simulation</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Progress Bar (Visualizer Timeline) */}
+        {isSimulating && (
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between text-[10px] font-mono text-gray-500">
+              <span>ELAPSED SLA TIME</span>
+              <span className="font-bold text-cyan-400">{simTime} / 45 MINS</span>
+            </div>
+            <div className="h-2 w-full bg-gray-950 rounded-full overflow-hidden border border-gray-800">
+              <div 
+                className="h-full bg-gradient-to-r from-cyan-500 via-amber-500 to-red-500 transition-all duration-300 rounded-full"
+                style={{ width: `${Math.min(100, (simTime / 45) * 100)}%` }}
+              ></div>
+            </div>
+          </div>
+        )}
+
+        {/* Timeline Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 relative">
           
-          <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4">
-            <span className="text-[10px] font-bold text-red-400 uppercase">Step 1 • 0 Mins</span>
-            <h4 className="font-bold text-white text-sm mt-1">Datadog / Prometheus Alert</h4>
-            <p className="text-xs text-gray-300 mt-1">Alert triggers incident. Auto-sends SMS & Push notification to Tier 1 Primary Responder.</p>
+          {/* Card 1: 0m */}
+          <div className={`rounded-xl border p-4 transition-all duration-300 ${
+            simTime >= 0 && isSimulating
+              ? 'border-cyan-500 bg-cyan-950/20 shadow-md shadow-cyan-500/5'
+              : 'border-gray-800 bg-gray-900/20 opacity-60'
+          }`}>
+            <span className={`text-[10px] font-bold uppercase ${simTime >= 0 && isSimulating ? 'text-cyan-400' : 'text-gray-500'}`}>
+              Step 1 • 0 Mins
+            </span>
+            <h4 className="font-bold text-white text-sm mt-1">Alert Ingestion</h4>
+            <p className="text-[11px] text-gray-400 mt-1">
+              Triggered state. Automated alert dispatched via SMS to Tier 1: **{selectedShift.tier1.name}**.
+            </p>
           </div>
 
-          <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
-            <span className="text-[10px] font-bold text-amber-400 uppercase">Step 2 • 5 Mins</span>
-            <h4 className="font-bold text-white text-sm mt-1">Unacknowledged Escalation</h4>
-            <p className="text-xs text-gray-300 mt-1">If unacknowledged after 5m, system initiates Twilio Voice Call & pages Tier 2 Backup.</p>
+          {/* Card 2: 15m */}
+          <div className={`rounded-xl border p-4 transition-all duration-300 ${
+            simTime >= selectedShift.escalationTimeoutMins && isSimulating
+              ? 'border-amber-500 bg-amber-950/20 shadow-md shadow-amber-500/5'
+              : 'border-gray-800 bg-gray-900/20 opacity-60'
+          }`}>
+            <span className={`text-[10px] font-bold uppercase ${simTime >= selectedShift.escalationTimeoutMins && isSimulating ? 'text-amber-400' : 'text-gray-500'}`}>
+              Step 2 • {selectedShift.escalationTimeoutMins} Mins
+            </span>
+            <h4 className="font-bold text-white text-sm mt-1">Tier 2 Backup</h4>
+            <p className="text-[11px] text-gray-400 mt-1">
+              Primary SLA breach. Dialing Twilio Voice Call alert to backup: **{selectedShift.tier2.name}**.
+            </p>
           </div>
 
-          <div className="rounded-xl border border-purple-500/30 bg-purple-500/10 p-4">
-            <span className="text-[10px] font-bold text-purple-400 uppercase">Step 3 • 15 Mins</span>
-            <h4 className="font-bold text-white text-sm mt-1">War Room Provisioning</h4>
-            <p className="text-xs text-gray-300 mt-1">Auto-provisions Video Bridge, Slack incident channel, and alerts Executive Lead.</p>
+          {/* Card 3: 30m */}
+          <div className={`rounded-xl border p-4 transition-all duration-300 ${
+            simTime >= 30 && isSimulating
+              ? 'border-purple-500 bg-purple-950/20 shadow-md shadow-purple-500/5'
+              : 'border-gray-800 bg-gray-900/20 opacity-60'
+          }`}>
+            <span className={`text-[10px] font-bold uppercase ${simTime >= 30 && isSimulating ? 'text-purple-400' : 'text-gray-500'}`}>
+              Step 3 • 30 Mins
+            </span>
+            <h4 className="font-bold text-white text-sm mt-1">War Room Provision</h4>
+            <p className="text-[11px] text-gray-400 mt-1">
+              Paging Executive Lead: **{selectedShift.executiveEscalation.name}**. Auto-creating Video War Room.
+            </p>
           </div>
 
-          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
-            <span className="text-[10px] font-bold text-emerald-400 uppercase">Step 4 • Post-Resolution</span>
-            <h4 className="font-bold text-white text-sm mt-1">RCA Enforcement</h4>
-            <p className="text-xs text-gray-300 mt-1">Locks Incident post-resolution until mandatory Root Cause Analysis report is generated.</p>
+          {/* Card 4: 40m */}
+          <div className={`rounded-xl border p-4 transition-all duration-300 ${
+            simTime >= 40 && isSimulating
+              ? 'border-emerald-500 bg-emerald-950/20 shadow-md shadow-emerald-500/5'
+              : 'border-gray-800 bg-gray-900/20 opacity-60'
+          }`}>
+            <span className={`text-[10px] font-bold uppercase ${simTime >= 40 && isSimulating ? 'text-emerald-400' : 'text-gray-500'}`}>
+              Step 4 • Acknowledged
+            </span>
+            <h4 className="font-bold text-white text-sm mt-1">SLA Halted</h4>
+            <p className="text-[11px] text-gray-400 mt-1">
+              Commander acknowledges. Video room active. Escalation pipeline stops.
+            </p>
           </div>
 
         </div>
+
+        {/* Live Simulator Logs Screen */}
+        {isSimulating && (
+          <div className="rounded-xl border border-gray-800 bg-gray-950 p-4 font-mono text-[11px] space-y-2.5">
+            <span className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest border-b border-gray-900 pb-1.5">
+              📟 REAL-TIME ESCALATION LOG CONSOLE
+            </span>
+            
+            <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+              {simLogs.map((log, idx) => (
+                <div key={idx} className="flex items-start space-x-2 leading-relaxed">
+                  <span className="text-gray-500 font-bold w-10">[{log.time}]</span>
+                  <span className={
+                    log.type === 'alert' ? 'text-red-400 font-bold' :
+                    log.type === 'success' ? 'text-emerald-400 font-bold' :
+                    'text-cyan-400'
+                  }>
+                    {log.msg}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
       </div>
 
       {/* Twilio Pager Logs Console */}
