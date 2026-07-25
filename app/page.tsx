@@ -20,6 +20,7 @@ import IncidentCard from '@/components/IncidentCard';
 import { useIncidentStore } from '@/lib/store';
 import { Severity } from '@/lib/types';
 import AlertDispatcherModal from '@/components/AlertDispatcherModal';
+import SystemTopologyMap from '@/components/SystemTopologyMap';
 
 export default function DashboardPage() {
   const { isLoaded, incidents, shifts, notifications } = useIncidentStore();
@@ -103,6 +104,9 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+
+      {/* Interactive System Topology Map */}
+      <SystemTopologyMap />
 
       {/* Main Grid: Left Column Incidents, Right Column On-Call & Notifications */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">

@@ -27,3 +27,26 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(156, 163, 175, 0.8);
 }
+
+/* SRE Topology Map Animations */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.animate-spin-slow {
+  transform-origin: center;
+  animation: spin-slow 20s linear infinite;
+}
+
+@keyframes flow-dash {
+  to {
+    stroke-dashoffset: -28;
+  }
+}
+.animate-flow-dash {
+  animation: flow-dash 1.2s linear infinite;
+}
