@@ -78,6 +78,8 @@ export default function IncidentStepperForm() {
   const [exactLocation, setExactLocation] = useState('');
   const [severityLevel, setSeverityLevel] = useState<'Level 1 (Low)' | 'Level 2 (Medium)' | 'Level 3 (High)'>('Level 1 (Low)');
   const [description, setDescription] = useState('');
+  const [solutionArea, setSolutionArea] = useState('Technology');
+  const [industrySector, setIndustrySector] = useState('Technology, Media & Telecommunications');
 
   const getSiteCode = (s: string) => {
     if (s === 'kolkata') return 'KOL';
@@ -146,9 +148,9 @@ export default function IncidentStepperForm() {
       title: `${site.toUpperCase()} IOF: ${exactLocation}`,
       description: `${description} [Reported by ${securityLead}]`,
       severity: mappedSev,
-      service: 'Platform & DB',
+      service: solutionArea,
       source: 'user',
-      tags: ['iof-compliance', site, 'facilities'],
+      tags: ['iof-compliance', site, 'facilities', industrySector.toLowerCase().replace(/[^a-z0-9]+/g, '-')],
     });
 
     setIsSubmitted(true);
@@ -292,6 +294,60 @@ export default function IncidentStepperForm() {
                 onChange={e => setContactMobile(e.target.value)}
                 className="w-full rounded-xl border border-gray-800 bg-gray-950 px-3 py-2 font-mono text-gray-100 focus:border-cyan-500 focus:outline-none"
               />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div>
+              <label className="block text-gray-400 mb-1">Impacted Solution Area</label>
+              <select
+                value={solutionArea}
+                onChange={e => setSolutionArea(e.target.value)}
+                className="w-full rounded-xl border border-gray-800 bg-gray-950 px-3 py-2 text-gray-100 focus:border-cyan-500 focus:outline-none"
+              >
+                <option value="Cybersecurity">🔒 Cybersecurity</option>
+                <option value="Internal Audit">📊 Internal Audit</option>
+                <option value="Risk Management">Risk Management</option>
+                <option value="Technology">💻 Technology</option>
+                <option value="Cloud">☁️ Cloud</option>
+                <option value="Data and Analytics">📉 Data and Analytics</option>
+                <option value="Regulatory Compliance">📜 Regulatory Compliance</option>
+                <option value="Sustainability">🌱 Sustainability</option>
+                <option value="Artificial Intelligence">🤖 Artificial Intelligence</option>
+                <option value="Operations">⚙️ Operations</option>
+                <option value="Managed Solutions">💼 Managed Solutions</option>
+                <option value="Global Capability Centres">🏢 Global Capability Centres</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-gray-400 mb-1">Affected Industry Sector</label>
+              <select
+                value={industrySector}
+                onChange={e => setIndustrySector(e.target.value)}
+                className="w-full rounded-xl border border-gray-800 bg-gray-950 px-3 py-2 text-gray-100 focus:border-cyan-500 focus:outline-none"
+              >
+                <option value="Asset & Wealth Management">Asset & Wealth Management</option>
+                <option value="Banking & Capital Markets">Banking & Capital Markets</option>
+                <option value="Consumer Goods">Consumer Goods</option>
+                <option value="Construction & Infrastructure">Construction & Infrastructure</option>
+                <option value="Education">Education</option>
+                <option value="Government">Government</option>
+                <option value="Healthcare">Healthcare</option>
+                <option value="Hospitality, Leisure & Travel">Hospitality, Leisure & Travel</option>
+                <option value="Insurance">Insurance</option>
+                <option value="Manufacturing Distribution">Manufacturing Distribution</option>
+                <option value="Mortgage & Consumer Lending">Mortgage & Consumer Lending</option>
+                <option value="Non-Profit">Non-Profit</option>
+                <option value="Oil, Gas & Resources">Oil, Gas & Resources</option>
+                <option value="Payments">Payments</option>
+                <option value="Pharma & Life Sciences">Pharma & Life Sciences</option>
+                <option value="Power, Utilities & Renewables">Power, Utilities & Renewables</option>
+                <option value="Private Equity">Private Equity</option>
+                <option value="Retail">Retail</option>
+                <option value="Technology, Media & Telecommunications">Technology, Media & Telecommunications</option>
+                <option value="Transportation & Logistics">Transportation & Logistics</option>
+              </select>
             </div>
           </div>
 
