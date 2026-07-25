@@ -46,20 +46,68 @@ export default function AnalyticsPage() {
 
   if (!isLoaded) return null;
 
-  const total = incidents.length;
-  const p1Count = incidents.filter(i => i.severity === 'P1').length;
-  const p2Count = incidents.filter(i => i.severity === 'P2').length;
-  const p3Count = incidents.filter(i => i.severity === 'P3').length;
-  const p4Count = incidents.filter(i => i.severity === 'P4').length;
+  const [selectedCity, setSelectedCity] = useState<'all' | 'kolkata' | 'bengaluru' | 'mumbai' | 'gurugram'>('all');
 
-  const breaches = incidents.filter(i => i.ttaBreached || i.ttrBreached).length;
-  const slaCompliancePct = total > 0 ? Math.round(((total - breaches) / total) * 100) : 98;
+  const getIncidentSite = (inc: any) => {
+    if (inc.id.includes('/ KOL') || inc.tags.includes('kolkata')) return 'Kolkata';
+    if (inc.id.includes('/ BLR') || inc.tags.includes('bengaluru')) return 'Bengaluru';
+    if (inc.id.includes('/ BOM') || inc.tags.includes('mumbai')) return 'Mumbai';
+    if (inc.id.includes('/ DEL') || inc.tags.includes('gurugram') || inc.tags.includes('delhi')) return 'Gurugram';
+    
+    const lowercaseTags = inc.tags.map((t: string) => t.toLowerCase());
+    if (lowercaseTags.includes('kolkata')) return 'Kolkata';
+    if (lowercaseTags.includes('bengaluru') || lowercaseTags.includes('blr')) return 'Bengaluru';
+    if (lowercaseTags.includes('mumbai') || lowercaseTags.includes('bom')) return 'Mumbai';
+    if (lowercaseTags.includes('delhi') || lowercaseTags.includes('gurugram') || lowercaseTags.includes('del')) return 'Gurugram';
+    
+    return 'Kolkata'; // fallback
+  };
+
+  const filteredIncidents = incidents.filter(inc => {
+    if (selectedCity === 'all') return true;
+    const city = getIncidentSite(inc).toLowerCase();
+    return city === selectedCity;
+  });
+
+  const total = filteredIncidents.length;
+  const p1Count = filteredIncidents.filter(i => i.severity === 'P1').length;
+  const p2Count = filteredIncidents.filter(i => i.severity === 'P2').length;
+  const p3Count = filteredIncidents.filter(i => i.severity === 'P3').length;
+  const p4Count = filteredIncidents.filter(i => i.severity === 'P4').length;
+
+  const breaches = filteredIncidents.filter(i => i.ttaBreached || i.ttrBreached).length;
+  const slaCompliancePct = total > 0 ? Math.round(((total - breaches) / total) * 100) : 100;
+
+  const handleDownloadCsv = () => {
+    const headers = ['Incident ID', 'Title', 'Severity', 'Service Area', 'Site Location', 'SLA Status', 'Incident Status', 'Created Time'];
+    const rows = filteredIncidents.map(inc => [
+      inc.id,
+      `"${inc.title.replace(/"/g, '""')}"`,
+      inc.severity,
+      inc.service,
+      getIncidentSite(inc),
+      inc.ttaBreached || inc.ttrBreached ? 'BREACHED' : 'COMPLIANT',
+      inc.status.toUpperCase(),
+      inc.createdAt
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `weekly_sla_report_${selectedCity}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const handleExportSlaReport = () => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    const incidentsListHtml = incidents.map(inc => `
+    const incidentsListHtml = filteredIncidents.map(inc => `
       <tr style="border-bottom: 1px solid #e2e8f0;">
         <td style="padding: 8px; font-weight: bold; color: #1e293b; font-family: monospace;">${inc.id}</td>
         <td style="padding: 8px; color: #334155;">${inc.title}</td>
@@ -156,20 +204,48 @@ export default function AnalyticsPage() {
     <div className="space-y-6">
       
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-white">SLA Performance & Reliability Metrics</h1>
           <p className="mt-1 text-xs text-gray-400">
             Analytics breakdown for Mean Time to Acknowledge (MTTA), Mean Time to Resolve (MTTR), and SLA targets
           </p>
         </div>
-        <button
-          onClick={handleExportSlaReport}
-          className="flex items-center space-x-1.5 rounded-xl border border-cyan-500/30 bg-cyan-950/20 px-4 py-2 text-xs font-bold text-cyan-300 hover:bg-cyan-500/20 transition-all shadow-md shadow-cyan-500/10"
-        >
-          <Printer className="h-4 w-4" />
-          <span>Export Weekly SLA Report</span>
-        </button>
+
+        <div className="flex flex-wrap items-center gap-3">
+          
+          {/* Site Selector Dropdown */}
+          <div className="flex items-center space-x-2">
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">FILTER SITE:</span>
+            <select
+              value={selectedCity}
+              onChange={e => setSelectedCity(e.target.value as any)}
+              className="rounded-xl border border-gray-800 bg-gray-900 px-3 py-2 text-xs font-semibold text-white focus:border-cyan-500 focus:outline-none"
+            >
+              <option value="all">📍 All Cities</option>
+              <option value="kolkata">Kolkata</option>
+              <option value="bengaluru">Bengaluru</option>
+              <option value="mumbai">Mumbai</option>
+              <option value="gurugram">Gurugram</option>
+            </select>
+          </div>
+
+          <button
+            onClick={handleDownloadCsv}
+            className="flex items-center space-x-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-xs font-bold text-emerald-300 hover:bg-emerald-500/20 transition-all shadow-md shadow-emerald-500/10"
+          >
+            <span>📥 Download CSV Report</span>
+          </button>
+
+          <button
+            onClick={handleExportSlaReport}
+            className="flex items-center space-x-1.5 rounded-xl border border-cyan-500/30 bg-cyan-950/20 px-4 py-2 text-xs font-bold text-cyan-300 hover:bg-cyan-500/20 transition-all shadow-md shadow-cyan-500/10"
+          >
+            <Printer className="h-4 w-4" />
+            <span>Print Report</span>
+          </button>
+
+        </div>
       </div>
 
       {/* Top Metrics Cards */}
