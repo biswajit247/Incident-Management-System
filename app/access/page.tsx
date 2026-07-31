@@ -19,7 +19,7 @@ export default function AccessControlPage() {
 
   if (!isLoaded) return null;
 
-  if (currentUser?.role === 'Reporter') {
+  if (currentUser?.role === 'Reporter' || currentUser?.role === 'NormalUser') {
     return (
       <div className="rounded-2xl border border-red-500/20 bg-red-950/10 p-12 text-center max-w-xl mx-auto space-y-4 my-12">
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-500/20 text-red-400">
@@ -202,6 +202,7 @@ export default function AccessControlPage() {
                   <option value="SecurityLead">SecurityLead (Read/Write Alerts)</option>
                   <option value="OrgAdmin">OrgAdmin (Full Admin Clearance)</option>
                   <option value="Reporter">Reporter (Read-Only Access)</option>
+                  <option value="NormalUser">Normal User (Local / Standard Access)</option>
                 </select>
               </div>
 
@@ -266,6 +267,8 @@ export default function AccessControlPage() {
                               ? 'bg-red-500/20 text-red-400 border border-red-500/30'
                               : u.role === 'SecurityLead'
                               ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                              : u.role === 'NormalUser'
+                              ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
                               : 'bg-gray-800 text-gray-400'
                           }`}>
                             {u.role}

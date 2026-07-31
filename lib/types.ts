@@ -10,7 +10,8 @@ export type IncidentStatus =
 
 export type IncidentSource = 'datadog' | 'prometheus' | 'user' | 'webhook' | 'api' | 'cloudwatch';
 
-export type UserRole = 'OrgAdmin' | 'SecurityLead' | 'Reporter';
+export type UserRole = 'OrgAdmin' | 'SecurityLead' | 'Reporter' | 'NormalUser';
+export type Role = UserRole;
 
 export interface User {
   id: string;
