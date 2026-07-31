@@ -434,6 +434,25 @@ export function useIncidentStore() {
     notify();
   };
 
+  // Update RCA Action Item Status
+  const updateRcaActionItemStatus = (reportId: string, actionItemId: string, status: 'todo' | 'in_progress' | 'completed') => {
+    globalState.rawRcaReports = globalState.rawRcaReports.map(report => {
+      if (report.id === reportId) {
+        const updatedActionItems = report.actionItems.map(item => {
+          if (item.id === actionItemId) {
+            return { ...item, status };
+          }
+          return item;
+        });
+        return { ...report, actionItems: updatedActionItems };
+      }
+      return report;
+    });
+
+    saveToLocalStorage();
+    notify();
+  };
+
   // Reset to default mock data
   const resetToDefault = () => {
     if (typeof window !== 'undefined') {
@@ -610,6 +629,7 @@ export function useIncidentStore() {
     addWarRoomMessage,
     addTimelineNote,
     saveRcaReport,
+    updateRcaActionItemStatus,
     createOnCallShift,
     simulateSlaAnomalies,
     resetToDefault,

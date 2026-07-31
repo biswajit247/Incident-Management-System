@@ -112,10 +112,13 @@ const RCA_TEMPLATES: Record<string, {
 };
 
 export default function RcaListPage() {
-  const { isLoaded, rcaReports, incidents, allIncidents, saveRcaReport, activeOrgId } = useIncidentStore();
+  const { isLoaded, rcaReports, incidents, allIncidents, saveRcaReport, updateRcaActionItemStatus, activeOrgId } = useIncidentStore();
   
   // Modal state
   const [selectedIncidentForForm, setSelectedIncidentForForm] = useState<any>(null);
+
+  // Tab state
+  const [activeView, setActiveView] = useState<'workspace' | 'tasks'>('workspace');
 
   // Generator states
   const [selectedIncidentId, setSelectedIncidentId] = useState('');
@@ -140,6 +143,21 @@ export default function RcaListPage() {
 
   // Filter list of eligible incidents for manual selector (resolved or active)
   const eligibleIncidents = (allIncidents || incidents).filter(i => !rcaReports.some(r => r.incidentId === i.id));
+
+  // Gather all Action Items from all RCA reports
+  const allActionItems = rcaReports.flatMap(report => 
+    report.actionItems.map(item => ({
+      ...item,
+      reportId: report.id,
+      reportTitle: report.title,
+      reportSeverity: report.severity,
+      incidentId: report.incidentId
+    }))
+  );
+
+  const todoTasks = allActionItems.filter(t => t.status === 'todo');
+  const inProgressTasks = allActionItems.filter(t => t.status === 'in_progress');
+  const completedTasks = allActionItems.filter(t => t.status === 'completed');
 
   const handleGenerateRca = () => {
     if (!selectedIncidentId) {
@@ -281,7 +299,36 @@ ${generatedReport.actionItems.map((item: any) => `- [ ] **${item.id}**: ${item.t
         </div>
       </div>
 
-      {/* Pending RCA Alert Banner (if any) */}
+      {/* View Tabs */}
+      <div className="flex items-center space-x-2 border-b border-gray-800 pb-2 text-xs">
+        <button
+          onClick={() => setActiveView('workspace')}
+          className={`flex items-center space-x-2 border-b-2 px-4 py-2 font-bold transition-colors ${
+            activeView === 'workspace'
+              ? 'border-red-500 text-red-400'
+              : 'border-transparent text-gray-400 hover:text-gray-200'
+          }`}
+        >
+          <FileText className="h-4 w-4" />
+          <span>Post-Mortem Studio Workspace</span>
+        </button>
+
+        <button
+          onClick={() => setActiveView('tasks')}
+          className={`flex items-center space-x-2 border-b-2 px-4 py-2 font-bold transition-colors ${
+            activeView === 'tasks'
+              ? 'border-red-500 text-red-400'
+              : 'border-transparent text-gray-400 hover:text-gray-200'
+          }`}
+        >
+          <FileSpreadsheet className="h-4 w-4" />
+          <span>Preventative Action Board</span>
+        </button>
+      </div>
+
+      {activeView === 'workspace' && (
+        <>
+          {/* Pending RCA Alert Banner (if any) */}
       {pendingRcaIncidents.length > 0 && (
         <div className="rounded-2xl border border-amber-500/50 bg-amber-500/10 p-5 backdrop-blur-md">
           <div className="flex items-center justify-between">
@@ -646,6 +693,171 @@ ${generatedReport.actionItems.map((item: any) => `- [ ] **${item.id}**: ${item.t
           ))}
         </div>
       </div>
+      </>
+      )}
+
+      {activeView === 'tasks' && (
+        <div className="space-y-6 animate-fadeIn">
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            
+            {/* TODO Column */}
+            <div className="rounded-2xl border border-gray-800 bg-gray-900/40 p-5">
+              <div className="flex items-center justify-between border-b border-gray-800 pb-3 mb-4">
+                <div className="flex items-center space-x-2">
+                  <span className="h-2 w-2 rounded-full bg-gray-500"></span>
+                  <span className="font-black text-gray-300 text-xs uppercase tracking-wider">Backlog / Todo</span>
+                </div>
+                <span className="rounded-full bg-gray-800 px-2 py-0.5 text-xs font-bold text-gray-400 font-mono">
+                  {todoTasks.length}
+                </span>
+              </div>
+              
+              <div className="space-y-3">
+                {todoTasks.length === 0 ? (
+                  <p className="text-xs text-gray-500 italic py-8 text-center bg-gray-950/20 border border-dashed border-gray-800 rounded-xl">No tasks in backlog.</p>
+                ) : (
+                  todoTasks.map(task => (
+                    <div key={task.id} className="rounded-xl border border-gray-800 bg-gray-950 p-4 space-y-3">
+                      <div>
+                        <div className="flex justify-between items-start">
+                          <span className="text-[9px] font-mono text-cyan-400 font-bold uppercase">{task.id}</span>
+                          <span className={`px-1.5 py-0.2 rounded text-[8px] font-black uppercase ${
+                            task.priority === 'high' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                            task.priority === 'medium' ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' :
+                            'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                          }`}>
+                            {task.priority}
+                          </span>
+                        </div>
+                        <h4 className="font-bold text-white text-xs mt-1.5 leading-snug">{task.title}</h4>
+                      </div>
+                      
+                      <div className="text-[10px] text-gray-400 space-y-1 bg-gray-900/40 p-2 rounded-lg">
+                        <p className="line-clamp-1"><span className="text-gray-500">RCA:</span> {task.reportTitle}</p>
+                        <p><span className="text-gray-500">Owner:</span> <strong className="text-gray-300 font-semibold">{task.assignee}</strong></p>
+                      </div>
+
+                      <div className="pt-2 border-t border-gray-800/60 flex justify-end">
+                        <button
+                          onClick={() => updateRcaActionItemStatus(task.reportId, task.id, 'in_progress')}
+                          className="px-3 py-1 rounded bg-cyan-600/10 text-cyan-400 hover:bg-cyan-600/20 border border-cyan-500/20 text-[10px] font-bold tracking-wider uppercase transition-all"
+                        >
+                          ⚡ Start Task →
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* IN PROGRESS Column */}
+            <div className="rounded-2xl border border-gray-800 bg-gray-900/40 p-5">
+              <div className="flex items-center justify-between border-b border-gray-800 pb-3 mb-4">
+                <div className="flex items-center space-x-2">
+                  <span className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                  <span className="font-black text-cyan-300 text-xs uppercase tracking-wider">In Progress</span>
+                </div>
+                <span className="rounded-full bg-cyan-950 border border-cyan-900/60 px-2 py-0.5 text-xs font-bold text-cyan-400 font-mono">
+                  {inProgressTasks.length}
+                </span>
+              </div>
+              
+              <div className="space-y-3">
+                {inProgressTasks.length === 0 ? (
+                  <p className="text-xs text-gray-500 italic py-8 text-center bg-gray-950/20 border border-dashed border-gray-800 rounded-xl">No active tasks in progress.</p>
+                ) : (
+                  inProgressTasks.map(task => (
+                    <div key={task.id} className="rounded-xl border border-cyan-500/20 bg-gray-950 p-4 space-y-3 shadow-md shadow-cyan-500/5">
+                      <div>
+                        <div className="flex justify-between items-start">
+                          <span className="text-[9px] font-mono text-cyan-400 font-bold uppercase">{task.id}</span>
+                          <span className={`px-1.5 py-0.2 rounded text-[8px] font-black uppercase ${
+                            task.priority === 'high' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                            task.priority === 'medium' ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' :
+                            'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                          }`}>
+                            {task.priority}
+                          </span>
+                        </div>
+                        <h4 className="font-bold text-white text-xs mt-1.5 leading-snug">{task.title}</h4>
+                      </div>
+                      
+                      <div className="text-[10px] text-gray-400 space-y-1 bg-gray-900/40 p-2 rounded-lg">
+                        <p className="line-clamp-1"><span className="text-gray-500">RCA:</span> {task.reportTitle}</p>
+                        <p><span className="text-gray-500">Owner:</span> <strong className="text-gray-300 font-semibold">{task.assignee}</strong></p>
+                      </div>
+
+                      <div className="pt-2 border-t border-gray-800/60 flex justify-between gap-2">
+                        <button
+                          onClick={() => updateRcaActionItemStatus(task.reportId, task.id, 'todo')}
+                          className="px-2.5 py-1 rounded hover:bg-gray-900 text-gray-400 text-[10px] font-bold tracking-wider uppercase transition-all"
+                        >
+                          ↩ Defer
+                        </button>
+                        <button
+                          onClick={() => updateRcaActionItemStatus(task.reportId, task.id, 'completed')}
+                          className="px-3 py-1 rounded bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20 border border-emerald-500/20 text-[10px] font-bold tracking-wider uppercase transition-all"
+                        >
+                          ✓ Complete
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* COMPLETED Column */}
+            <div className="rounded-2xl border border-gray-800 bg-gray-900/40 p-5">
+              <div className="flex items-center justify-between border-b border-gray-800 pb-3 mb-4">
+                <div className="flex items-center space-x-2">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
+                  <span className="font-black text-emerald-300 text-xs uppercase tracking-wider">Completed</span>
+                </div>
+                <span className="rounded-full bg-emerald-950 border border-emerald-900/60 px-2 py-0.5 text-xs font-bold text-emerald-400 font-mono">
+                  {completedTasks.length}
+                </span>
+              </div>
+              
+              <div className="space-y-3">
+                {completedTasks.length === 0 ? (
+                  <p className="text-xs text-gray-500 italic py-8 text-center bg-gray-950/20 border border-dashed border-gray-800 rounded-xl">No tasks completed yet.</p>
+                ) : (
+                  completedTasks.map(task => (
+                    <div key={task.id} className="rounded-xl border border-gray-800 bg-gray-950 p-4 space-y-3 opacity-70 hover:opacity-100 transition-opacity">
+                      <div>
+                        <div className="flex justify-between items-start">
+                          <span className="text-[9px] font-mono text-gray-500 font-bold uppercase line-through">{task.id}</span>
+                          <span className="px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[8px] font-black uppercase">
+                            COMPLETED
+                          </span>
+                        </div>
+                        <h4 className="font-bold text-gray-300 text-xs mt-1.5 leading-snug line-through">{task.title}</h4>
+                      </div>
+                      
+                      <div className="text-[10px] text-gray-400 space-y-1 bg-gray-900/40 p-2 rounded-lg">
+                        <p className="line-clamp-1"><span className="text-gray-500">RCA:</span> {task.reportTitle}</p>
+                        <p><span className="text-gray-500">Owner:</span> <strong className="text-gray-300 font-semibold">{task.assignee}</strong></p>
+                      </div>
+
+                      <div className="pt-2 border-t border-gray-800/60 flex justify-start">
+                        <button
+                          onClick={() => updateRcaActionItemStatus(task.reportId, task.id, 'in_progress')}
+                          className="px-2.5 py-1 rounded hover:bg-gray-900 text-gray-400 text-[10px] font-bold tracking-wider uppercase transition-all"
+                        >
+                          ↩ Reopen Task
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
 
       {selectedIncidentForForm && (
         <IncidentOccurrenceFormModal 
