@@ -16,7 +16,8 @@ import {
   Bell, 
   CheckCircle2, 
   RefreshCw,
-  MessageSquareCode
+  MessageSquareCode,
+  Zap
 } from 'lucide-react';
 import { useIncidentStore } from '@/lib/store';
 import AlertDispatcherModal from './AlertDispatcherModal';
@@ -42,6 +43,7 @@ export default function Navigation() {
     { href: '/analytics', label: 'SLA Analytics', icon: BarChart3 },
     { href: '/integrations', label: 'ChatOps & Webhooks', icon: MessageSquareCode },
     { href: '/access', label: 'Access Control', icon: UserCheck },
+    { href: '/chaos', label: 'Chaos Sandbox', icon: Zap },
   ];
 
   return (
