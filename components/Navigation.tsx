@@ -35,7 +35,7 @@ export default function Navigation() {
   const activeP1Count = incidents.filter(i => i.severity === 'P1' && i.status !== 'resolved').length;
   const activeTotalCount = incidents.filter(i => i.status !== 'resolved').length;
 
-  const navItems = [
+  const baseNavItems = [
     { href: '/', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/incidents', label: 'Incidents', icon: AlertTriangle, badge: activeTotalCount },
     { href: '/schedules', label: 'On-Call & Escalation', icon: Calendar },
@@ -45,6 +45,13 @@ export default function Navigation() {
     { href: '/access', label: 'Access Control', icon: UserCheck },
     { href: '/chaos', label: 'Chaos Sandbox', icon: Zap },
   ];
+
+  const navItems = baseNavItems.filter(item => {
+    if (currentUser?.role === 'Reporter') {
+      return item.href !== '/chaos' && item.href !== '/access';
+    }
+    return true;
+  });
 
   return (
     <>

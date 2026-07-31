@@ -143,6 +143,32 @@ export default function ChaosSandboxPage() {
 
   const currentExperiment = EXPERIMENTS.find(e => e.id === selectedExpId)!;
 
+  if (currentUser?.role === 'Reporter') {
+    return (
+      <div className="rounded-2xl border border-red-500/20 bg-red-950/10 p-12 text-center max-w-xl mx-auto space-y-4 my-12">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-500/20 text-red-400">
+          <ShieldAlert className="h-6 w-6" />
+        </div>
+        <div>
+          <h3 className="font-bold text-white text-base">🔒 Access Denied: Permissions Locked</h3>
+          <p className="text-xs text-gray-400 mt-1">
+            Chaos engineering operations are restricted to authorized **Security Leads (SecOps Leads)**. Your current role is **{currentUser.role}**.
+          </p>
+        </div>
+        <button
+          onClick={() => setIsAuthModalOpen(true)}
+          className="px-4 py-2 rounded-xl bg-gray-800 text-white font-bold text-xs hover:bg-gray-700 transition-all"
+        >
+          👤 Switch Account
+        </button>
+
+        {isAuthModalOpen && (
+          <AuthModal onClose={() => setIsAuthModalOpen(false)} />
+        )}
+      </div>
+    );
+  }
+
   useEffect(() => {
     // Check which experiments match active incidents
     const activeMapping: Record<string, string> = {};

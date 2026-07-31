@@ -39,7 +39,8 @@ export default function IncidentDetailClient({ id }: IncidentDetailClientProps) 
     updateIncidentStatus, 
     reassignResponder,
     addTimelineNote,
-    rcaReports
+    rcaReports,
+    currentUser
   } = useIncidentStore();
 
   const [activeTab, setActiveTab] = useState<'warroom' | 'timeline' | 'rca' | 'bridge'>('warroom');
@@ -191,17 +192,21 @@ export default function IncidentDetailClient({ id }: IncidentDetailClientProps) 
           <div className="flex flex-wrap items-center gap-1.5">
             {statusWorkflowOptions.map((opt) => {
               const isActive = incident.status === opt.status;
+              const isReporter = currentUser?.role === 'Reporter';
               return (
                 <button
                   key={opt.status}
+                  disabled={isReporter}
                   onClick={() => updateIncidentStatus(incident.id, opt.status, incident.assignedTo.name)}
-                  className={`rounded-lg px-3 py-1 font-semibold transition-all ${
+                  className={`rounded-lg px-3 py-1 font-semibold transition-all flex items-center space-x-1 ${
                     isActive
                       ? 'bg-red-600 text-white shadow-md shadow-red-500/30'
                       : 'border border-gray-800 bg-gray-950 text-gray-400 hover:border-gray-700 hover:text-white'
-                  }`}
+                  } ${isReporter ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  title={isReporter ? '🔒 Only authorized Security Leads can transition status' : ''}
                 >
-                  {opt.label}
+                  {isReporter && <Lock className="h-3 w-3 inline shrink-0" />}
+                  <span>{opt.label}</span>
                 </button>
               );
             })}
@@ -260,17 +265,19 @@ export default function IncidentDetailClient({ id }: IncidentDetailClientProps) 
           )}
         </button>
 
-        <button
-          onClick={() => setActiveTab('bridge')}
-          className={`flex items-center space-x-2 border-b-2 px-4 py-2 font-bold transition-colors ${
-            activeTab === 'bridge'
-              ? 'border-red-500 text-red-400'
-              : 'border-transparent text-gray-400 hover:text-gray-200'
-          }`}
-        >
-          <Video className="h-4 w-4" />
-          <span>Live Voice Bridge</span>
-        </button>
+        {currentUser?.role !== 'Reporter' && (
+          <button
+            onClick={() => setActiveTab('bridge')}
+            className={`flex items-center space-x-2 border-b-2 px-4 py-2 font-bold transition-colors ${
+              activeTab === 'bridge'
+                ? 'border-red-500 text-red-400'
+                : 'border-transparent text-gray-400 hover:text-gray-200'
+            }`}
+          >
+            <Video className="h-4 w-4" />
+            <span>Live Voice Bridge</span>
+          </button>
+        )}
       </div>
 
       {/* Tab Content Display */}
@@ -290,22 +297,24 @@ export default function IncidentDetailClient({ id }: IncidentDetailClientProps) 
           </div>
 
           {/* Add Timeline Note Form */}
-          <form onSubmit={handleAddNoteSubmit} className="flex items-center space-x-2">
-            <input
-              type="text"
-              value={noteInput}
-              onChange={e => setNoteInput(e.target.value)}
-              placeholder="Add entry or key observation to official timeline audit log..."
-              className="flex-1 rounded-xl border border-gray-800 bg-gray-950 px-4 py-2 text-xs text-gray-100 focus:border-red-500 focus:outline-none"
-            />
-            <button
-              type="submit"
-              className="flex items-center space-x-1 rounded-xl bg-gray-800 px-4 py-2 text-xs font-semibold text-gray-200 hover:bg-gray-700"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              <span>Add Event Note</span>
-            </button>
-          </form>
+          {currentUser?.role !== 'Reporter' && (
+            <form onSubmit={handleAddNoteSubmit} className="flex items-center space-x-2">
+              <input
+                type="text"
+                value={noteInput}
+                onChange={e => setNoteInput(e.target.value)}
+                placeholder="Add entry or key observation to official timeline audit log..."
+                className="flex-1 rounded-xl border border-gray-800 bg-gray-950 px-4 py-2 text-xs text-gray-100 focus:border-red-500 focus:outline-none"
+              />
+              <button
+                type="submit"
+                className="flex items-center space-x-1 rounded-xl bg-gray-800 px-4 py-2 text-xs font-semibold text-gray-200 hover:bg-gray-700"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                <span>Add Event Note</span>
+              </button>
+            </form>
+          )}
 
           {/* Timeline Feed */}
           <div className="relative border-l-2 border-gray-800 pl-6 space-y-6 ml-3">

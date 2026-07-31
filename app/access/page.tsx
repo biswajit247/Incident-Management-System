@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useIncidentStore } from '@/lib/store';
 import { User, Role } from '@/lib/types';
 import { UserCheck, ShieldAlert, Plus, Trash2, Key, Users, UserPlus, Lock } from 'lucide-react';
+import AuthModal from '@/components/AuthModal';
 
 export default function AccessControlPage() {
   const { isLoaded, currentUser, users, addUser, removeUser, login } = useIncidentStore();
@@ -14,8 +15,35 @@ export default function AccessControlPage() {
   const [title, setTitle] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   if (!isLoaded) return null;
+
+  if (currentUser?.role === 'Reporter') {
+    return (
+      <div className="rounded-2xl border border-red-500/20 bg-red-950/10 p-12 text-center max-w-xl mx-auto space-y-4 my-12">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-500/20 text-red-400">
+          <ShieldAlert className="h-6 w-6" />
+        </div>
+        <div>
+          <h3 className="font-bold text-white text-base">🔒 Access Denied: Permissions Locked</h3>
+          <p className="text-xs text-gray-400 mt-1">
+            Access control and IAM policies can only be managed by **VP of Infrastructure & Security / Org Admin** accounts. Your current role is **{currentUser.role}**.
+          </p>
+        </div>
+        <button
+          onClick={() => setIsAuthModalOpen(true)}
+          className="px-4 py-2 rounded-xl bg-gray-800 text-white font-bold text-xs hover:bg-gray-700 transition-all"
+        >
+          👤 Switch Account
+        </button>
+
+        {isAuthModalOpen && (
+          <AuthModal onClose={() => setIsAuthModalOpen(false)} />
+        )}
+      </div>
+    );
+  }
 
   const isAdmin = currentUser?.role === 'OrgAdmin';
 

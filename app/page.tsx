@@ -23,7 +23,7 @@ import AlertDispatcherModal from '@/components/AlertDispatcherModal';
 import SystemTopologyMap from '@/components/SystemTopologyMap';
 
 export default function DashboardPage() {
-  const { isLoaded, incidents, shifts, notifications } = useIncidentStore();
+  const { isLoaded, incidents, shifts, notifications, currentUser } = useIncidentStore();
   const [selectedTab, setSelectedTab] = useState<'all' | 'P1' | 'P2' | 'unacked'>('all');
   const [isSimModalOpen, setIsSimModalOpen] = useState(false);
 
@@ -64,15 +64,17 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        <div className="flex items-center space-x-3">
-          <button
-            onClick={() => setIsSimModalOpen(true)}
-            className="flex items-center space-x-2 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-red-500/20 hover:from-red-500 hover:to-amber-500 transition-all"
-          >
-            <Radio className="h-4 w-4 animate-pulse" />
-            <span>+ Dispatch Telemetry Alert</span>
-          </button>
-        </div>
+        {currentUser?.role !== 'Reporter' && (
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={() => setIsSimModalOpen(true)}
+              className="flex items-center space-x-2 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-red-500/20 hover:from-red-500 hover:to-amber-500 transition-all"
+            >
+              <Radio className="h-4 w-4 animate-pulse" />
+              <span>+ Dispatch Telemetry Alert</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Metrics Overview Row */}

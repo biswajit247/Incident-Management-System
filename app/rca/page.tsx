@@ -112,7 +112,7 @@ const RCA_TEMPLATES: Record<string, {
 };
 
 export default function RcaListPage() {
-  const { isLoaded, rcaReports, incidents, allIncidents, saveRcaReport, updateRcaActionItemStatus, activeOrgId } = useIncidentStore();
+  const { isLoaded, rcaReports, incidents, allIncidents, saveRcaReport, updateRcaActionItemStatus, activeOrgId, currentUser } = useIncidentStore();
   
   // Modal state
   const [selectedIncidentForForm, setSelectedIncidentForForm] = useState<any>(null);
@@ -133,6 +133,12 @@ export default function RcaListPage() {
   const [generatedReport, setGeneratedReport] = useState<any | null>(null);
   const [isCopied, setIsCopied] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+
+  React.useEffect(() => {
+    if (currentUser?.role === 'Reporter') {
+      setActiveView('tasks');
+    }
+  }, [currentUser]);
 
   if (!isLoaded) return null;
 
@@ -300,31 +306,33 @@ ${generatedReport.actionItems.map((item: any) => `- [ ] **${item.id}**: ${item.t
       </div>
 
       {/* View Tabs */}
-      <div className="flex items-center space-x-2 border-b border-gray-800 pb-2 text-xs">
-        <button
-          onClick={() => setActiveView('workspace')}
-          className={`flex items-center space-x-2 border-b-2 px-4 py-2 font-bold transition-colors ${
-            activeView === 'workspace'
-              ? 'border-red-500 text-red-400'
-              : 'border-transparent text-gray-400 hover:text-gray-200'
-          }`}
-        >
-          <FileText className="h-4 w-4" />
-          <span>Post-Mortem Studio Workspace</span>
-        </button>
+      {currentUser?.role !== 'Reporter' && (
+        <div className="flex items-center space-x-2 border-b border-gray-800 pb-2 text-xs">
+          <button
+            onClick={() => setActiveView('workspace')}
+            className={`flex items-center space-x-2 border-b-2 px-4 py-2 font-bold transition-colors ${
+              activeView === 'workspace'
+                ? 'border-red-500 text-red-400'
+                : 'border-transparent text-gray-400 hover:text-gray-200'
+            }`}
+          >
+            <FileText className="h-4 w-4" />
+            <span>Post-Mortem Studio Workspace</span>
+          </button>
 
-        <button
-          onClick={() => setActiveView('tasks')}
-          className={`flex items-center space-x-2 border-b-2 px-4 py-2 font-bold transition-colors ${
-            activeView === 'tasks'
-              ? 'border-red-500 text-red-400'
-              : 'border-transparent text-gray-400 hover:text-gray-200'
-          }`}
-        >
-          <FileSpreadsheet className="h-4 w-4" />
-          <span>Preventative Action Board</span>
-        </button>
-      </div>
+          <button
+            onClick={() => setActiveView('tasks')}
+            className={`flex items-center space-x-2 border-b-2 px-4 py-2 font-bold transition-colors ${
+              activeView === 'tasks'
+                ? 'border-red-500 text-red-400'
+                : 'border-transparent text-gray-400 hover:text-gray-200'
+            }`}
+          >
+            <FileSpreadsheet className="h-4 w-4" />
+            <span>Preventative Action Board</span>
+          </button>
+        </div>
+      )}
 
       {activeView === 'workspace' && (
         <>

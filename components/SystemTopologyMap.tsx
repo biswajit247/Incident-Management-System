@@ -35,7 +35,7 @@ const CONNECTIONS = [
 ];
 
 export default function SystemTopologyMap() {
-  const { incidents } = useIncidentStore();
+  const { incidents, currentUser } = useIncidentStore();
   const [selectedNode, setSelectedNode] = useState<Node>(NODES[1]);
   const [isSimModalOpen, setIsSimModalOpen] = useState(false);
 
@@ -340,15 +340,17 @@ export default function SystemTopologyMap() {
 
           </div>
 
-          <div className="mt-4 pt-3 border-t border-gray-800/60 flex space-x-2">
-            <button
-              onClick={() => setIsSimModalOpen(true)}
-              className="flex-1 py-2 rounded-xl border border-red-500/20 bg-red-500/10 text-red-400 text-xs font-bold hover:bg-red-500/20 transition-all flex items-center justify-center space-x-1"
-            >
-              <ShieldAlert className="h-3.5 w-3.5" />
-              <span>⚡ Inject Fault</span>
-            </button>
-          </div>
+          {currentUser?.role !== 'Reporter' && (
+            <div className="mt-4 pt-3 border-t border-gray-800/60 flex space-x-2">
+              <button
+                onClick={() => setIsSimModalOpen(true)}
+                className="flex-1 py-2 rounded-xl border border-red-500/20 bg-red-500/10 text-red-400 text-xs font-bold hover:bg-red-500/20 transition-all flex items-center justify-center space-x-1"
+              >
+                <ShieldAlert className="h-3.5 w-3.5" />
+                <span>⚡ Inject Fault</span>
+              </button>
+            </div>
+          )}
         </div>
 
       </div>
