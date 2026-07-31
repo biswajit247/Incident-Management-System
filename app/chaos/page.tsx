@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useIncidentStore } from '@/lib/store';
 import { Severity } from '@/lib/types';
+import AuthModal from '@/components/AuthModal';
 
 interface ChaosExperiment {
   id: string;
@@ -125,12 +126,16 @@ const EXPERIMENTS: ChaosExperiment[] = [
 ];
 
 export default function ChaosSandboxPage() {
-  const { incidents, createIncident, updateIncidentStatus } = useIncidentStore();
+  const { incidents, createIncident, updateIncidentStatus, currentUser } = useIncidentStore();
   
   const [selectedExpId, setSelectedExpId] = useState(EXPERIMENTS[0].id);
   const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
   const [isInjecting, setIsInjecting] = useState(false);
   const [activeExperiments, setActiveExperiments] = useState<Record<string, string>>({}); // expId -> incidentId
+
+  // Auth permissions states
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authError, setAuthError] = useState<'auth_required' | 'insufficient_privileges' | null>(null);
 
   // Live telemetry mock charts
   const [telemetryCpu, setTelemetryCpu] = useState(15);
@@ -174,6 +179,17 @@ export default function ChaosSandboxPage() {
   }, [incidents]);
 
   const handleLaunchExperiment = () => {
+    // Authentication & Role Permissions Gate
+    if (!currentUser) {
+      setAuthError('auth_required');
+      return;
+    }
+    if (currentUser.role !== 'SecurityLead' && currentUser.role !== 'OrgAdmin') {
+      setAuthError('insufficient_privileges');
+      return;
+    }
+    setAuthError(null);
+
     if (activeExperiments[currentExperiment.id]) {
       alert('This experiment is already running on the cluster.');
       return;
@@ -316,6 +332,25 @@ export default function ChaosSandboxPage() {
                 </div>
               </div>
 
+              {authError && (
+                <div className="mt-4 p-3 rounded-xl border border-red-500/30 bg-red-950/20 text-[11px] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                  <div className="flex items-center space-x-2 text-red-300">
+                    <ShieldAlert className="h-4 w-4 shrink-0 animate-bounce" />
+                    <span>
+                      {authError === 'auth_required' 
+                        ? 'Authentication Required: You must be logged in as a Security Lead to execute stress testing.' 
+                        : `Permission Denied: Your role (${currentUser?.role}) is not authorized. Required: SecurityLead.`}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setIsAuthModalOpen(true)}
+                    className="shrink-0 text-[10px] font-bold text-cyan-400 hover:underline"
+                  >
+                    {authError === 'auth_required' ? '🔑 Authenticate' : '👤 Switch User'}
+                  </button>
+                </div>
+              )}
+
               <div className="mt-5 pt-3 border-t border-gray-800/60">
                 <button
                   onClick={handleLaunchExperiment}
@@ -436,6 +471,10 @@ export default function ChaosSandboxPage() {
         </div>
 
       </div>
+
+      {isAuthModalOpen && (
+        <AuthModal onClose={() => setIsAuthModalOpen(false)} />
+      )}
 
     </div>
   );

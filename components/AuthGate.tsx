@@ -6,7 +6,7 @@ import { ShieldCheck, Mail, Lock, ArrowRight } from 'lucide-react';
 import { JWTPayload, User } from '@/lib/types';
 
 export default function AuthGate({ children }: { children: React.ReactNode }) {
-  const { currentUser, login, isLoaded, users, organizations } = useIncidentStore();
+  const { currentUser, login, isLoaded, users, organizations, themeMode } = useIncidentStore();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -179,5 +179,13 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
     );
   }
 
-  return <>{children}</>;
+  return (
+    <div className={
+      themeMode === 'cyberpunk' ? 'theme-cyberpunk min-h-screen flex flex-col' :
+      themeMode === 'neon' ? 'theme-neon min-h-screen flex flex-col font-mono' :
+      'theme-default min-h-screen flex flex-col'
+    }>
+      {children}
+    </div>
+  );
 }

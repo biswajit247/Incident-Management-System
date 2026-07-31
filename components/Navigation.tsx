@@ -27,7 +27,7 @@ import { Building2, Settings, ShieldCheck, UserCheck } from 'lucide-react';
 
 export default function Navigation() {
   const pathname = usePathname();
-  const { incidents, resetToDefault, organizations, activeOrgId, setActiveOrgId, activeOrganization, currentUser } = useIncidentStore();
+  const { incidents, resetToDefault, organizations, activeOrgId, setActiveOrgId, activeOrganization, currentUser, themeMode, setThemeMode } = useIncidentStore();
   const [isSimModalOpen, setIsSimModalOpen] = useState(false);
   const [isTenantSettingsOpen, setIsTenantSettingsOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -124,6 +124,37 @@ export default function Navigation() {
               <Radio className="h-4 w-4" />
               <span>+ Dispatch Alert</span>
             </button>
+
+            {/* Theme Toggle Button Group */}
+            <div className="flex items-center space-x-1 rounded-xl bg-gray-900/60 p-1 border border-gray-800 text-[10px]">
+              <button
+                onClick={() => setThemeMode('default')}
+                className={`px-2 py-1 rounded font-bold transition-all ${
+                  themeMode === 'default' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'text-gray-400 hover:text-white'
+                }`}
+                title="Deep Space Dark Theme"
+              >
+                🌌 Dark
+              </button>
+              <button
+                onClick={() => setThemeMode('cyberpunk')}
+                className={`px-2 py-1 rounded font-bold transition-all ${
+                  themeMode === 'cyberpunk' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'text-gray-400 hover:text-white'
+                }`}
+                title="Cyberpunk Amber Theme"
+              >
+                🔥 Amber
+              </button>
+              <button
+                onClick={() => setThemeMode('neon')}
+                className={`px-2 py-1 rounded font-bold transition-all ${
+                  themeMode === 'neon' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'text-gray-400 hover:text-white'
+                }`}
+                title="Neon Terminal Theme"
+              >
+                🟢 Neon
+              </button>
+            </div>
 
             {/* Reset System Button */}
             <button

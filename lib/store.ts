@@ -40,6 +40,7 @@ let globalState = {
   rawShifts: [] as OnCallShift[],
   rawRcaReports: [] as RcaReport[],
   notifications: [] as NotificationLog[],
+  themeMode: 'default' as 'default' | 'cyberpunk' | 'neon',
   isLoaded: false,
 };
 
@@ -64,6 +65,7 @@ const saveToLocalStorage = () => {
       currentUser: globalState.currentUser,
       jwtToken: globalState.jwtToken,
       organizations: globalState.organizations,
+      themeMode: globalState.themeMode,
     }));
   } catch (e) {
     console.error('Failed to save state:', e);
@@ -94,6 +96,7 @@ export function useIncidentStore() {
           globalState.currentUser = parsed.currentUser || null;
           globalState.jwtToken = parsed.jwtToken || null;
           globalState.organizations = parsed.organizations || MOCK_ORGANIZATIONS;
+          globalState.themeMode = parsed.themeMode || 'default';
         } else {
           globalState.rawIncidents = INITIAL_INCIDENTS;
           globalState.timelineEvents = INITIAL_TIMELINE_EVENTS;
@@ -189,6 +192,12 @@ export function useIncidentStore() {
 
   const updateOrganization = (orgId: string, updates: Partial<Organization>) => {
     globalState.organizations = globalState.organizations.map(o => o.id === orgId ? { ...o, ...updates } : o);
+    saveToLocalStorage();
+    notify();
+  };
+
+  const setThemeMode = (mode: 'default' | 'cyberpunk' | 'neon') => {
+    globalState.themeMode = mode;
     saveToLocalStorage();
     notify();
   };
@@ -611,6 +620,8 @@ export function useIncidentStore() {
     isLoaded: globalState.isLoaded,
     currentUser: globalState.currentUser,
     jwtToken: globalState.jwtToken,
+    themeMode: globalState.themeMode,
+    setThemeMode,
     login,
     logout,
     organizations: globalState.organizations,
