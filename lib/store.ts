@@ -187,6 +187,12 @@ export function useIncidentStore() {
     notify();
   };
 
+  const updateOrganization = (orgId: string, updates: Partial<Organization>) => {
+    globalState.organizations = globalState.organizations.map(o => o.id === orgId ? { ...o, ...updates } : o);
+    saveToLocalStorage();
+    notify();
+  };
+
   const incidents = globalState.activeOrgId === 'ALL' ? globalState.rawIncidents : globalState.rawIncidents.filter(i => i.organizationId === globalState.activeOrgId);
   const shifts = globalState.activeOrgId === 'ALL' ? globalState.rawShifts : globalState.rawShifts.filter(s => s.organizationId === globalState.activeOrgId);
   const rcaReports = globalState.activeOrgId === 'ALL' ? globalState.rawRcaReports : globalState.rawRcaReports.filter(r => r.organizationId === globalState.activeOrgId);
@@ -612,6 +618,7 @@ export function useIncidentStore() {
     activeOrganization,
     setActiveOrgId,
     updateOrganizationSla,
+    updateOrganization,
     incidents,
     allIncidents: globalState.rawIncidents,
     timelineEvents: globalState.timelineEvents,

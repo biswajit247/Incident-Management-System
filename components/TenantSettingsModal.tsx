@@ -10,14 +10,26 @@ interface TenantSettingsModalProps {
 }
 
 export default function TenantSettingsModal({ onClose }: TenantSettingsModalProps) {
-  const { activeOrganization, updateOrganizationSla } = useIncidentStore();
+  const { activeOrganization, updateOrganization } = useIncidentStore();
 
+  const [companyName, setCompanyName] = useState(activeOrganization.name);
+  const [companySubdomain, setCompanySubdomain] = useState(activeOrganization.subdomain);
+  const [companyPrefix, setCompanyPrefix] = useState(activeOrganization.prefix);
+  const [companyLogoUrl, setCompanyLogoUrl] = useState(activeOrganization.logoUrl || '');
+  const [companyBadgeColor, setCompanyBadgeColor] = useState(activeOrganization.badgeColor);
   const [sla, setSla] = useState<SLAConfig>(activeOrganization.slaSettings);
   const [isSavedMsg, setIsSavedMsg] = useState(false);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    updateOrganizationSla(activeOrganization.id, sla);
+    updateOrganization(activeOrganization.id, {
+      name: companyName,
+      subdomain: companySubdomain,
+      prefix: companyPrefix,
+      logoUrl: companyLogoUrl,
+      badgeColor: companyBadgeColor,
+      slaSettings: sla
+    });
     setIsSavedMsg(true);
     setTimeout(() => {
       setIsSavedMsg(false);
@@ -34,13 +46,13 @@ export default function TenantSettingsModal({ onClose }: TenantSettingsModalProp
           <div className="flex items-center space-x-3">
             <div 
               className="flex h-9 w-9 items-center justify-center rounded-xl text-white font-bold text-xs"
-              style={{ backgroundColor: activeOrganization.badgeColor }}
+              style={{ backgroundColor: companyBadgeColor }}
             >
-              {activeOrganization.prefix}
+              {companyPrefix}
             </div>
             <div>
-              <h2 className="text-base font-bold text-white">{activeOrganization.name} Settings</h2>
-              <p className="text-xs text-gray-400">Tenant Routing: {activeOrganization.subdomain}</p>
+              <h2 className="text-base font-bold text-white">{companyName} Settings</h2>
+              <p className="text-xs text-gray-400">Tenant Routing: {companySubdomain}</p>
             </div>
           </div>
 
@@ -54,22 +66,63 @@ export default function TenantSettingsModal({ onClose }: TenantSettingsModalProp
           {/* General Information */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-gray-400 mb-1">Company Subdomain</label>
+              <label className="block text-gray-400 mb-1">Company Name</label>
               <input
                 type="text"
-                disabled
-                value={activeOrganization.subdomain}
-                className="w-full rounded-xl border border-gray-800 bg-gray-900 px-3 py-2 font-mono text-cyan-400"
+                value={companyName}
+                onChange={e => setCompanyName(e.target.value)}
+                className="w-full rounded-xl border border-gray-800 bg-gray-950 px-3 py-2 text-white focus:border-cyan-500 focus:outline-none"
               />
             </div>
 
             <div>
+              <label className="block text-gray-400 mb-1">Company Subdomain</label>
+              <input
+                type="text"
+                value={companySubdomain}
+                onChange={e => setCompanySubdomain(e.target.value)}
+                className="w-full rounded-xl border border-gray-800 bg-gray-950 px-3 py-2 font-mono text-cyan-400 focus:border-cyan-500 focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div>
               <label className="block text-gray-400 mb-1">Incident ID Prefix</label>
               <input
                 type="text"
-                disabled
-                value={activeOrganization.prefix}
-                className="w-full rounded-xl border border-gray-800 bg-gray-900 px-3 py-2 font-mono font-bold text-white"
+                value={companyPrefix}
+                onChange={e => setCompanyPrefix(e.target.value)}
+                className="w-full rounded-xl border border-gray-800 bg-gray-950 px-3 py-2 font-mono font-bold text-white focus:border-cyan-500 focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-gray-400 mb-1">Brand Theme Color</label>
+              <div className="flex space-x-1.5 items-center">
+                <input
+                  type="color"
+                  value={companyBadgeColor}
+                  onChange={e => setCompanyBadgeColor(e.target.value)}
+                  className="h-8 w-8 rounded border border-gray-800 bg-transparent cursor-pointer"
+                />
+                <input
+                  type="text"
+                  value={companyBadgeColor}
+                  onChange={e => setCompanyBadgeColor(e.target.value)}
+                  className="w-full rounded-xl border border-gray-800 bg-gray-950 px-2 py-2 font-mono text-white focus:border-cyan-500 focus:outline-none text-[10px]"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-gray-400 mb-1">Company Logo URL</label>
+              <input
+                type="text"
+                value={companyLogoUrl}
+                onChange={e => setCompanyLogoUrl(e.target.value)}
+                className="w-full rounded-xl border border-gray-800 bg-gray-950 px-3 py-2 text-white focus:border-cyan-500 focus:outline-none text-[10px]"
+                placeholder="https://..."
               />
             </div>
           </div>
